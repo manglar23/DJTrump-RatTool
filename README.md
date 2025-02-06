@@ -12,7 +12,7 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 ## DESTRUCTIVE
 
 - `.endpc`: Uninstall Windows and format the MBR.
-- `.crashpc`: Floods the RAM of the PC, instantly crashing it.
+- `.crashpc`: Crashes the PC Via forkbomb
 - `.bsod`: Trigger a Blue Screen of Death (BSOD) crash.
 
 ---
