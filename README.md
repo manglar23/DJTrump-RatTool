@@ -1,7 +1,7 @@
 # DJTrump-RatTool
 RAT written in Python controlled via discord bot and with a builder for your own bot.
 for more instructions check here
-[![Wiki](https://discordratsetupinstructions.neocities.org)]
+https://discordratsetupinstructions.neocities.org
 
 # DJTrump Rat Command List
 
