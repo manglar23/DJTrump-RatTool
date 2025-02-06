@@ -1,2 +1,2 @@
 # DJTrump-RatTool
-Trump Themed remote access trojan
+RAT written in Python controlled via discord bot and with a builder for your own bot.
