@@ -3,7 +3,8 @@ RAT written in Python controlled via discord bot and with a builder for your own
 for more instructions check here
 https://discordratsetupinstructions.neocities.org
 ## VIDEO GUIDE HERE
-<a href="#" onclick="location.reload();">Reload Page</a>
+<div style="width: 100px; height: 100px; background-color: red;"></div>
+
 
 
 
