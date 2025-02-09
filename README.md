@@ -3,7 +3,7 @@ RAT written in Python controlled via discord bot and with a builder for your own
 for more instructions check here
 https://discordratsetupinstructions.neocities.org
 ## VIDEO GUIDE HERE
-https://www.youtube.com/embed/lq5OrEtYqQA
+https://www.youtube.com/watch?v=lq5OrEtYqQA
 
 
 
