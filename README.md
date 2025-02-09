@@ -3,7 +3,7 @@ RAT written in Python controlled via discord bot and with a builder for your own
 for more instructions check here
 https://discordratsetupinstructions.neocities.org
 ## VIDEO GUIDE HERE
-[![Watch the video](https://img.youtube.com/vi/XeZfe7Vq3cU/0.jpg)](https://www.youtube.com/watch?v=XeZfe7Vq3cU)
+https://youtu.be/lq5OrEtYqQA
 
 # DJTrump Rat Command List
 
