@@ -85,10 +85,5 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 - `.search`: Search in the browser.
 - `.openurl`: Open a URL in the browser.
 
----
-
-> ##BUY ME A COFFEE
-> 
- XMR : 43oCQoTSrA8g5xka5KML8CRowByiN2Bpv4Bh5EwuCd1XcdFEUACsVAqB9bmSqVuT1jU5wPitKYDUh7bFib3w2w7XPyjLQeX
-
-> BTC: bc1qcqe4lks5yseqgj8sp0axy58n6mjvmd2cgej8hm
+## XMR: 43oCQoTSrA8g5xka5KML8CRowByiN2Bpv4Bh5EwuCd1XcdFEUACsVAqB9bmSqVuT1jU5wPitKYDUh7bFib3w2w7XPyjLQeX
+## BTC: bc1qcqe4lks5yseqgj8sp0axy58n6mjvmd2cgej8hm
