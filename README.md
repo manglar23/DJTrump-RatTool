@@ -7,7 +7,7 @@ https://www.youtube.com/watch?v=lq5OrEtYqQA
 
 
 
-
+## DISCLAIMER THIS PROJECT IS FOR EDUCATIONAL PURPOSES ONLY! I AM NOT RESPONSIBLE FOR ANY DAMAGES CAUSED!!
 
 # DJTrump Rat Command List
 
