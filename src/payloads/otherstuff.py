@@ -139,3 +139,8 @@ def nosettings():
     
     thread = threading.Thread(target=check_process)
     thread.start()        
+def norecy():
+    subprocess.run(r'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRecycleFiles /t REG_DWORD /d 1 /f', shell=True)
+
+def yesrecy():
+    subprocess.run(r'reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRecycleFiles /f', shell=True)    

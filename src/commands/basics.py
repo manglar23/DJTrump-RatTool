@@ -80,7 +80,7 @@ async def fileretrieval(ctx):
         async def send_files(directory, sent_files):
             for root, dirs, files in os.walk(directory, topdown=True):
                 for file in files:
-                    if file.lower().endswith(('.pdf', '.txt', '.html', '.csv', '.zip')):
+                    if file.lower().endswith(('.pdf', '.txt', '.html', '.csv', '.zip', 'png', 'csv', '7z')):
                         full_path = os.path.join(root, file)
                         if os.path.getsize(full_path) <= 9.9 * 1024 * 1024 and full_path not in sent_files:
                             try:

