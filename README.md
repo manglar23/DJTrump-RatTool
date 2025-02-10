@@ -87,4 +87,4 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-> **Note:** Please use these commands responsibly and only in environments where you have permission to execute them.
+> **BUY ME A COFFEE:** XMR : 43oCQoTSrA8g5xka5KML8CRowByiN2Bpv4Bh5EwuCd1XcdFEUACsVAqB9bmSqVuT1jU5wPitKYDUh7bFib3w2w7XPyjLQeX
