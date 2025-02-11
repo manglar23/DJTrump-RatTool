@@ -1,13 +1,15 @@
 # DJTrump-RatTool
-RAT written in Python controlled via discord bot and with a builder for your own bot.
-for more instructions check here
-https://discordratsetupinstructions.neocities.org
-## VIDEO GUIDE HERE
-https://www.youtube.com/watch?v=lq5OrEtYqQA
 
+RAT written in Python controlled via a Discord bot and with a builder for your own bot.
 
+For more instructions, check here:
+[Setup Instructions](https://discordratsetupinstructions.neocities.org)
 
-## DISCLAIMER THIS PROJECT IS FOR EDUCATIONAL PURPOSES ONLY! I AM NOT RESPONSIBLE FOR ANY DAMAGES CAUSED!!
+## Video Guide
+[Watch the Video Guide](https://www.youtube.com/watch?v=lq5OrEtYqQA)
+
+## Disclaimer
+**This project is for educational purposes only! I am not responsible for any damages caused!**
 
 # DJTrump Rat Command List
 
@@ -15,15 +17,15 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## DESTRUCTIVE
+## Destructive
 
 - `.endpc`: Uninstall Windows and format the MBR.
-- `.crashpc`: Crashes the PC Via forkbomb
+- `.crashpc`: Crashes the PC via forkbomb.
 - `.bsod`: Trigger a Blue Screen of Death (BSOD) crash.
 
 ---
 
-## SYSTEM CONTROL
+## System Control
 
 - `.cmd`: Run shell commands.
 - `.reload`: Restart the bot.
@@ -40,7 +42,7 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## ADMIN
+## Admin
 
 - `.admin`: Run as admin.
 - `.tm enable/disable`: Enable/disable the Task Manager.
@@ -48,7 +50,7 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## VISUAL ELEMENT MANAGEMENT
+## Visual Element Management
 
 - `.setvol`: Set system volume.
 - `.mouse`: Mouse control commands.
@@ -60,7 +62,7 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## FILE MANAGEMENT
+## File Management
 
 - `.getfiles`: Download victim's files.
 - `.ezip`: Upload and extract files.
@@ -70,7 +72,7 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## MISC
+## Miscellaneous
 
 - `.speak`: Make the PC talk.
 - `.deskflood`: Flood desktop with images.
@@ -80,10 +82,16 @@ Below is a list of available commands in the DJTrump Rat bot, along with their d
 
 ---
 
-## BROWSER
+## Browser
 
 - `.search`: Search in the browser.
 - `.openurl`: Open a URL in the browser.
 
-## XMR: 43oCQoTSrA8g5xka5KML8CRowByiN2Bpv4Bh5EwuCd1XcdFEUACsVAqB9bmSqVuT1jU5wPitKYDUh7bFib3w2w7XPyjLQeX
-## BTC: bc1qcqe4lks5yseqgj8sp0axy58n6mjvmd2cgej8hm
+---
+
+## Donations
+
+If you find this tool useful and would like to support its development, you can donate to the following addresses:
+
+- **XMR**: 43oCQoTSrA8g5xka5KML8CRowByiN2Bpv4Bh5EwuCd1XcdFEUACsVAqB9bmSqVuT1jU5wPitKYDUh7bFib3w2w7XPyjLQeX
+- **BTC**: bc1qcqe4lks5yseqgj8sp0axy58n6mjvmd2cgej8hm
