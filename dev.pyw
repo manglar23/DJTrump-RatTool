@@ -4,11 +4,10 @@ def print(c):
 
 intents = discord.Intents.all()
 bot=YVdoaGRHVnVhV2RuWlhKemRHaGxlWE5vWVd4c1pHbGw.Bot(command_prefix='.',intents=intents,help_command=None)
-bot.commands_channel={}
-ffs()
+bot.commandzchannel={}
 @bot.event
 async def on_message(message):
-    if message.channel.id not in bot.commands_channel:
+    if message.channel.id not in bot.commandzchannel:
         return
     await bot.process_commands(message)
 @bot.event

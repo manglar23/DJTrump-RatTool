@@ -181,7 +181,7 @@ async def cd_command(ctx, *, args: str = None):
     elif args.startswith("exopen "):
         dir_path = args[len("exopen "):].strip()
         if os.path.exists(dir_path) and os.path.isdir(dir_path):
-            subprocess.run(f'explorer /select,"{dir_path}"', check=True)
+            os.system(f'explorer /select,"{dir_path}"', check=True)
             await ctx.send(f"File explorer opened for: {dir_path}")
         else:
             await ctx.send(f"Directory not found: {dir_path}")
