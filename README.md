@@ -22,8 +22,8 @@ If you find this tool useful and would like to support its development, you can 
 
 ## Features
 
-- **Token Stealer**: Supports multiple tokens.
-- **Discord Bot Control**: Accepts multiple PCs simultaneously.
+- **Token Stealer**: Steals user tokens from the computer.
+- **Discord Bot Control**: Allows for control over multiple computers at the same time via the bot.
 - **Custom Bot Token**: Build with your own bot token.
 - **Real-Time Monitoring**: Screenshots and keylogging.
 - **Browser Stealer**: Supports over 20 browsers.
