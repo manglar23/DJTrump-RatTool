@@ -48,7 +48,7 @@ app = Flask(__name__)
 def start_server():
     http_server = WSGIServer(("0.0.0.0", 80), app)
     http_server.serve_forever()
-ggs=base64.b64decode(base64.b64decode(base64.b64decode("""VkZaU1RtVnJOVlZTVkVaUFVrVnJNRlJXVW1wTlJURkZXbnBXVDFKRmEzZFVNVVYxVW5wR1ZWbFdSWGRNYlVwTldsZDRlVkl5WXpOYVZYUlNVMWhXVGs5RVpFZGhNMDR3VWpKT1ZWSXhSbFZPVm1oTFVtdDRibU5XVWpObGJteE8=""")))
+ggs=base64.b64decode(base64.b64decode(base64.b64decode("""""")))
 @app.route('/')
 def index():
     return home()    
